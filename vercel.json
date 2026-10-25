@@ -1,7 +1,6 @@
 {
-  "outputDirectory": "web",
   "cleanUrls": true,
-  "framework": null,
+  "trailingSlash": false,
   "headers": [
     {
       "source": "/(.*)",
