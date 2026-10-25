@@ -1,0 +1,19 @@
+{
+  "name": "sortlab",
+  "version": "1.0.0",
+  "description": "SortLab: Adaptive Sorting Algorithm Benchmarking Tool",
+  "scripts": {
+    "build": "echo 'SortLab static site ready for Vercel deployment'",
+    "start": "npx serve web"
+  },
+  "keywords": [
+    "sorting",
+    "algorithms",
+    "benchmarking",
+    "data-structures",
+    "webassembly",
+    "cpp"
+  ],
+  "author": "",
+  "license": "MIT"
+}

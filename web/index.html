@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SortLab: Adaptive Sorting Algorithm Benchmarking & Study Platform</title>
+  
+  <!-- Typography: Fraunces (Serif), Work Sans (Grotesque), IBM Plex Mono (Tabular Monospace) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400..800;1,9..144,400..800&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Work+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- =========================================================================
+       TOP NAVIGATION BAR
+       ========================================================================= -->
+  <nav class="lab-nav">
+    <div class="notebook-container lab-nav-inner">
+      <a href="#sec-visualizer" class="nav-brand">
+        <span class="nav-brand-title">SortLab</span>
+        <span class="nav-brand-id">DSA STUDY BENCHMARK</span>
+      </a>
+
+      <ul class="nav-toc">
+        <li><a href="#sec-visualizer" class="active"><span class="nav-toc-num">01</span> Visualizer</a></li>
+        <li><a href="#sec-arcade"><span class="nav-toc-num">02</span> Arcade 🎮</a></li>
+        <li><a href="#sec-learn"><span class="nav-toc-num">03</span> Learn</a></li>
+        <li><a href="#sec-compare"><span class="nav-toc-num">04</span> Compare</a></li>
+        <li><a href="#sec-about"><span class="nav-toc-num">05</span> About</a></li>
+      </ul>
+
+      <div class="nav-right-tools">
+        <!-- Player XP Level Badge -->
+        <div class="player-xp-pill" id="playerXpBadge" title="Earn XP by playing games and solving quizzes">
+          <span>⭐ Lvl <strong id="playerLevelText">1</strong>:</span>
+          <span id="playerXpText">0 XP</span>
+        </div>
+
+        <!-- Quiz Score Badge -->
+        <div class="quiz-score-pill" id="globalQuizScoreBadge" title="Total correct quiz answers across all algorithms">
+          <span>Quiz Score:</span>
+          <strong id="globalQuizScoreText">0 / 30</strong>
+        </div>
+
+        <!-- Glossary Drawer Button -->
+        <button type="button" class="btn btn-sm" id="btnOpenGlossary" title="Open DSA Terminology Glossary">
+          <span>📖 Glossary</span>
+        </button>
+
+        <!-- Light / Dark Theme Toggle Button -->
+        <button type="button" class="btn btn-sm" id="btnToggleTheme" title="Toggle Light/Dark Mode">
+          <span id="themeToggleIcon">🌓 Theme</span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="notebook-container">
+
+    <!-- =======================================================================
+         HERO SECTION (SHORT, DIRECT, PUTS TOOL IMMEDIATELY BELOW)
+         ======================================================================= -->
+    <header class="hero-compact">
+      <div class="hero-title-group">
+        <h1>Learn sorting by watching it happen</h1>
+        <p class="hero-subtitle">
+          An interactive laboratory for Data Structures &amp; Algorithms in C++. Step through comparisons,
+          inspect in-memory mutations, and track synchronized source code execution line by line.
+        </p>
+      </div>
+
+      <div class="hero-mini-tape" id="heroMiniTape" title="Live sorting preview">
+        <!-- Populated dynamically with sorting bars -->
+      </div>
+    </header>
+
+    <!-- INTRO QUICK STRIP & TRY AN EXAMPLE -->
+    <div class="intro-strip">
+      <div class="intro-steps-summary">
+        <div class="intro-step-pill"><span class="intro-step-num">1</span> <span>Type numbers</span></div>
+        <div class="intro-step-pill">&rarr;</div>
+        <div class="intro-step-pill"><span class="intro-step-num">2</span> <span>Pick a sort</span></div>
+        <div class="intro-step-pill">&rarr;</div>
+        <div class="intro-step-pill"><span class="intro-step-num">3</span> <span>Press Visualize</span></div>
+      </div>
+
+      <button type="button" class="btn btn-sm btn-primary" id="btnTryExample">
+        <span>⚡ Try an example: [45, 12, 89, 3, 27]</span>
+      </button>
+    </div>
+
+    <!-- =======================================================================
+         SECTION 01: VISUALIZER (COMPACT CONTROL STRIP + 60/40 WORKSPACE)
+         ======================================================================= -->
+    <section class="lab-section" id="sec-visualizer" style="padding-top: 1rem;">
+      <div class="section-header band-visualizer">
+        <div>
+          <div class="section-label">01 // Interactive Visualizer</div>
+          <h2 class="section-title">Step-by-Step Sorting Laboratory</h2>
+        </div>
+        <div class="section-marginalia">
+          Configure your input sequence and algorithm choice in the control strip below.
+          The interactive workspace displays the animated canvas and code panel simultaneously without scrolling.
+        </div>
+      </div>
+
+      <!-- COMPACT TOP CONTROL STRIP: STEP 1 (INPUT) & STEP 2 (ALGORITHM) -->
+      <div class="visualizer-control-strip">
+        <!-- STEP 1: ENTER INPUT -->
+        <div class="strip-card" id="step1Strip">
+          <div class="strip-card-header">
+            <span class="strip-card-title">Step 1: Enter Input</span>
+            <span class="strip-step-badge">Input Sequence</span>
+          </div>
+
+          <div class="input-field-wrap">
+            <input type="text" id="customInputBox" class="text-input-field" 
+                   value="45, 12, 89, 3, 27" 
+                   placeholder="e.g. 45, 12, 89, 3, 27 (comma or space separated)"
+                   autocomplete="off" spellcheck="false">
+            <div id="inputFeedback" class="input-feedback valid">
+              <span>&#10003; 5 valid numbers loaded. Ready for visualization.</span>
+            </div>
+          </div>
+
+          <div class="presets-row">
+            <div class="presets-group">
+              <span class="mono" style="font-size: 0.75rem; font-weight: 700; color: var(--ink-muted); margin-right: 2px;">PRESETS:</span>
+              <button type="button" class="btn btn-sm btn-preset" data-preset="random">Random</button>
+              <button type="button" class="btn btn-sm btn-preset" data-preset="sorted">Sorted</button>
+              <button type="button" class="btn btn-sm btn-preset" data-preset="reverse">Reverse</button>
+              <button type="button" class="btn btn-sm btn-preset" data-preset="nearly_sorted">Nearly</button>
+              <button type="button" class="btn btn-sm btn-preset" data-preset="duplicates">Duplicates</button>
+            </div>
+
+            <div class="size-slider-group">
+              <span class="mono" style="font-size: 0.75rem; font-weight: 700;">N:</span>
+              <input type="range" id="sizeSlider" min="5" max="60" value="12" style="width: 80px; accent-color: var(--band-visualizer);">
+              <span id="sizeSliderVal" class="mono" style="font-weight: 700; min-width: 24px;">12</span>
+              <button type="button" class="btn btn-sm btn-secondary" id="btnGenSize">Gen</button>
+            </div>
+          </div>
+
+          <!-- Labeled Box Row of Entered Array -->
+          <div class="array-preview-container">
+            <div class="array-preview-label">
+              <span>In-Memory Indices (<span id="arrayLengthLabel">5 elements</span>)</span>
+              <span class="mono" style="color: var(--band-visualizer);">[INDEX] : VALUE</span>
+            </div>
+            <div class="array-boxes-scroll" id="arrayBoxesRow">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 2: CHOOSE ALGORITHM -->
+        <div class="strip-card" id="step2Strip">
+          <div class="strip-card-header">
+            <span class="strip-card-title">Step 2: Choose Algorithm</span>
+            <span class="strip-step-badge">Strategy</span>
+          </div>
+
+          <div class="algo-chips-grid" id="algoChipsGrid">
+            <div class="algo-chip selected" data-algo="0">
+              <span class="algo-chip-name" style="color: var(--algo-insertion);">Insertion</span>
+              <span class="algo-chip-indicator" style="background-color: var(--algo-insertion);"></span>
+            </div>
+            <div class="algo-chip" data-algo="1">
+              <span class="algo-chip-name" style="color: var(--algo-merge);">Merge</span>
+              <span class="algo-chip-indicator" style="background-color: transparent;"></span>
+            </div>
+            <div class="algo-chip" data-algo="2">
+              <span class="algo-chip-name" style="color: var(--algo-quick);">Quick (Med-3)</span>
+              <span class="algo-chip-indicator" style="background-color: transparent;"></span>
+            </div>
+            <div class="algo-chip" data-algo="3">
+              <span class="algo-chip-name" style="color: var(--algo-heap);">Heap</span>
+              <span class="algo-chip-indicator" style="background-color: transparent;"></span>
+            </div>
+            <div class="algo-chip" data-algo="4">
+              <span class="algo-chip-name" style="color: var(--algo-adaptive);">Adaptive</span>
+              <span class="algo-chip-indicator" style="background-color: transparent;"></span>
+            </div>
+            <div class="algo-chip" data-algo="5">
+              <span class="algo-chip-name" style="color: var(--algo-bubble);">Bubble</span>
+              <span class="algo-chip-indicator" style="background-color: transparent;"></span>
+            </div>
+            <div class="algo-chip" data-algo="6">
+              <span class="algo-chip-name" style="color: var(--algo-selection);">Selection</span>
+              <span class="algo-chip-indicator" style="background-color: transparent;"></span>
+            </div>
+            <div class="algo-chip" data-algo="7">
+              <span class="algo-chip-name" style="color: var(--algo-shell);">Shell</span>
+              <span class="algo-chip-indicator" style="background-color: transparent;"></span>
+            </div>
+            <div class="algo-chip" data-algo="8">
+              <span class="algo-chip-name" style="color: var(--algo-counting);">Counting</span>
+              <span class="algo-chip-indicator" style="background-color: transparent;"></span>
+            </div>
+            <div class="algo-chip" data-algo="9">
+              <span class="algo-chip-name" style="color: var(--algo-radix);">Radix (LSD)</span>
+              <span class="algo-chip-indicator" style="background-color: transparent;"></span>
+            </div>
+          </div>
+
+          <div class="algo-desc-box" id="algoDescBox">
+            <span id="algoDescText">Insertion Sort: Builds sorted prefix by shifting larger elements right. Optimal O(n) for small or presorted arrays.</span>
+            <span class="mono" id="algoComplexityBadge" style="font-weight: 800; color: var(--algo-insertion);">O(n²) Avg</span>
+          </div>
+
+          <label class="comparison-mode-toggle">
+            <input type="checkbox" id="chkComparisonMode" style="accent-color: var(--band-visualizer); transform: scale(1.15);">
+            <span>Enable Comparison Mode (race 2 or more algorithms side-by-side in stacked lanes)</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- STEP 3 WORKSPACE: 60% ANIMATION CANVAS (LEFT) + 40% CODE PANEL (RIGHT) -->
+      <div class="workspace-grid" id="step3Workspace">
+        <!-- LEFT: ANIMATION CANVAS COLUMN -->
+        <div class="canvas-column">
+          <div class="canvas-card">
+            <!-- Stage Status Header -->
+            <div class="stage-status-header">
+              <div>
+                <span id="stageAlgoName" style="color: var(--algo-insertion); font-size: 1rem;">Insertion Sort</span>
+                <span style="color: var(--ink-muted); margin-left: 0.5rem;" id="stageStatusPhase">| Ready to execute</span>
+              </div>
+              <div id="verifiedBadge" style="display: none; color: var(--bar-sorted); font-weight: 800;">
+                <span>✓ Verified Sorted</span>
+              </div>
+            </div>
+
+            <!-- The Main Animated Bar Arena (Min 420px height) -->
+            <div class="stage-arena-wrap" id="stageArenaWrap">
+              <!-- Adaptive Analysis Card (Shown when Adaptive Sort is active) -->
+              <div id="adaptiveAnalysisCard" class="adaptive-analysis-banner" style="display: none;">
+                <div class="analysis-header">
+                  <span>Input Invariant Analysis</span>
+                  <span id="adaptiveProfileStats">Runs: 1 | Inversions: 0 | Size: 5</span>
+                </div>
+                <div>
+                  <span class="decision-badge" id="adaptiveDecisionBadge">Chosen Strategy: Insertion Sort</span>
+                  <span style="font-size: 14px; margin-left: 0.5rem;" id="adaptiveReasonText">Array is nearly sorted; Insertion Sort achieves near-linear O(n) time.</span>
+                </div>
+              </div>
+
+              <!-- Insertion Sort Floating Key Area -->
+              <div id="insertionFloatStage" class="insertion-float-stage" style="display: none;">
+                <div class="insertion-key-badge" id="insertionKeyBadge">
+                  <span>Elevated Key:</span>
+                  <span id="insertionKeyVal">12</span>
+                </div>
+              </div>
+
+              <!-- Primary Main Bars Container -->
+              <div class="bars-container-main" id="barsContainerMain">
+                <!-- Bar elements populated dynamically by app.js -->
+              </div>
+
+              <!-- Merge Sort Auxiliary Array Container (Rendered directly under main array) -->
+              <div id="mergeAuxStage" class="merge-aux-stage" style="display: none;">
+                <div class="merge-aux-label">Temporary Auxiliary Buffer: temp[k++]</div>
+                <div class="merge-aux-bars" id="mergeAuxBars">
+                  <!-- Auxiliary bars populated dynamically during merge -->
+                </div>
+              </div>
+
+              <!-- Heap Sort Binary Tree Representation (Embedded) -->
+              <div id="heapTreeWorkspace" class="heap-tree-workspace" style="display: none;">
+                <!-- SVG Binary Heap Tree populated dynamically -->
+              </div>
+
+              <!-- Multi-Lane Comparison Arena (Shown in comparison mode) -->
+              <div id="comparisonArenaLanes" class="comparison-arena-lanes" style="display: none;">
+                <!-- Multiple lanes populated dynamically -->
+              </div>
+            </div>
+
+            <!-- Vivid Color Legend -->
+            <div class="canvas-legend-strip">
+              <div class="legend-chip-item">
+                <span class="legend-color-swatch" style="background-color: var(--bar-default);"></span>
+                <span>Idle / Inactive</span>
+              </div>
+              <div class="legend-chip-item">
+                <span class="legend-color-swatch" style="background-color: var(--bar-compare);"></span>
+                <span>Comparing</span>
+              </div>
+              <div class="legend-chip-item">
+                <span class="legend-color-swatch" style="background-color: var(--bar-swap);"></span>
+                <span>Swapping / Moving</span>
+              </div>
+              <div class="legend-chip-item">
+                <span class="legend-color-swatch" style="background-color: var(--bar-pivot);"></span>
+                <span>Pivot / Key</span>
+              </div>
+              <div class="legend-chip-item">
+                <span class="legend-color-swatch" style="background-color: var(--bar-sorted);"></span>
+                <span>Sorted</span>
+              </div>
+            </div>
+
+            <!-- Large "What's Happening" Caption Box (18px+ font) -->
+            <div class="live-caption-box">
+              <div class="caption-meta-row">
+                <div style="display: flex; align-items: center; gap: 0.65rem;">
+                  <span class="caption-tag">What's Happening</span>
+                  <span id="vizStepPhaseBadge" class="step-phase-pill">Ready</span>
+                </div>
+                <div class="explain-toggle-group">
+                  <button type="button" class="explain-btn active" id="btnExplainSimple">Explain simply</button>
+                  <button type="button" class="explain-btn" id="btnExplainTech">Technical</button>
+                </div>
+              </div>
+
+              <!-- Student Step Note Banner -->
+              <div class="student-note-hud" id="studentNoteHud">
+                <div class="hud-item">
+                  <span class="hud-label">ACTION:</span>
+                  <strong class="hud-val" id="hudActionText">Algorithm Standby</strong>
+                </div>
+                <div class="hud-item">
+                  <span class="hud-label">INVARIANT:</span>
+                  <span class="hud-val" id="hudInvariantText">Press "Visualize" to begin step-by-step trace</span>
+                </div>
+              </div>
+
+              <div class="caption-message-text" id="liveCaptionText">
+                Press "Visualize" or "Next Step" to begin inspecting step-by-step sorting operations.
+              </div>
+            </div>
+
+            <!-- Prediction Quiz Mode Banner (When enabled) -->
+            <div id="predictionBanner" class="prediction-banner" style="display: none;">
+              <div class="prediction-question" id="predictionQuestionText">
+                🔮 Prediction Mode: Which two elements will be compared next? Click on the bars above to answer!
+              </div>
+              <div class="prediction-feedback" id="predictionFeedbackText"></div>
+            </div>
+          </div>
+
+          <!-- Big Transport Bar below Canvas -->
+          <div class="transport-bar">
+            <div class="transport-actions">
+              <button type="button" class="btn btn-primary" id="btnVizPrimary">
+                <span id="vizPlayIcon">&#9658;</span> <span id="vizPlayText">Visualize</span>
+              </button>
+              <button type="button" class="btn btn-sm" id="btnVizPrev" title="Step backward (&larr; key)">
+                <span>&larr; Prev</span>
+              </button>
+              <button type="button" class="btn btn-sm" id="btnVizNext" title="Step forward (&rarr; key)">
+                <span>Next &rarr;</span>
+              </button>
+              <button type="button" class="btn btn-sm" id="btnVizRestart" title="Restart animation (R key)">
+                <span>Restart</span>
+              </button>
+            </div>
+
+            <div class="scrubber-group">
+              <span id="scrubberStepLabel" class="tabular-nums">Step 0 / 0</span>
+              <input type="range" id="stepScrubber" class="step-scrubber-slider" min="0" max="0" value="0">
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span class="mono" style="font-size: 0.78rem; font-weight: 700;">SPEED</span>
+              <input type="range" id="animSpeedSlider" min="1" max="100" value="45" style="width: 80px; accent-color: var(--band-visualizer);">
+            </div>
+          </div>
+
+          <!-- Live Metric Counters Grid -->
+          <div class="viz-metrics-grid">
+            <div class="metric-tile">
+              <span class="metric-tile-label">Comparisons</span>
+              <span class="metric-tile-val tabular-nums" id="liveComps">0</span>
+            </div>
+            <div class="metric-tile">
+              <span class="metric-tile-label">Swaps / Moves</span>
+              <span class="metric-tile-val tabular-nums" id="liveSwaps">0</span>
+            </div>
+            <div class="metric-tile">
+              <span class="metric-tile-label">Step Progress</span>
+              <span class="metric-tile-val tabular-nums" id="liveStepProg">0 / 0</span>
+            </div>
+            <div class="metric-tile">
+              <span class="metric-tile-label">Elapsed Latency</span>
+              <span class="metric-tile-val tabular-nums" id="liveTime">0.0 µs</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- RIGHT: SYNCHRONIZED CODE PANEL (40% WIDTH, STICKY, 520PX FIXED HEIGHT) -->
+        <div class="code-viewer-column">
+          <div class="code-viewer-card">
+            <div class="code-viewer-header">
+              <span class="code-title" id="codeViewerTitle">C++ Implementation</span>
+              <div class="code-lang-toggle">
+                <button type="button" class="lang-btn active" id="btnToggleCpp">C++</button>
+                <button type="button" class="lang-btn" id="btnTogglePseudo">Pseudocode</button>
+              </div>
+            </div>
+            <div class="code-scroll-body" id="codeScrollBody">
+              <!-- Synchronized lines populated by app.js -->
+            </div>
+          </div>
+
+          <!-- Prediction Toggle Card -->
+          <div style="margin-top: 1rem; background: var(--paper-card); border: var(--border-ink); box-shadow: var(--shadow-flat-sm); padding: 0.85rem 1.25rem; border-radius: var(--radius-lg);">
+            <label style="display: flex; align-items: center; gap: 0.6rem; cursor: pointer; font-family: var(--font-mono); font-size: 0.82rem; font-weight: 700;">
+              <input type="checkbox" id="chkPredictNext" style="accent-color: var(--algo-insertion); transform: scale(1.15);">
+              <span>🔮 "Predict the next step" interactive quiz mode</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         SECTION 02: INTERACTIVE GAME ARCADE (LEARN DSA BY PLAYING)
+         ======================================================================= -->
+    <section class="lab-section" id="sec-arcade">
+      <div class="section-header band-visualizer" style="border-bottom-color: #7A3E8E;">
+        <div>
+          <div class="section-label" style="color: #7A3E8E;">02 // Interactive Game Arcade</div>
+          <h2 class="section-title">DSA Sorting Challenge &amp; Battle Royale</h2>
+        </div>
+        <div class="section-marginalia">
+          Put your sorting intuition to the test. Play hands-on sorting puzzles, wager on algorithm races,
+          and earn XP to advance from Sorting Novice to Algorithm Grandmaster!
+        </div>
+      </div>
+
+      <!-- Arcade Mode Switcher Tabs -->
+      <div class="game-mode-tabs" id="gameModeTabs">
+        <button type="button" class="game-tab-btn active" data-game="manual">
+          <span>🎮 Mode A: Sort It Yourself</span>
+        </button>
+        <button type="button" class="game-tab-btn" data-game="battle">
+          <span>⚔️ Mode B: Algorithm Battle Royale</span>
+        </button>
+        <button type="button" class="game-tab-btn" data-game="duel">
+          <span>🧠 Mode C: Step Predictor Duel</span>
+        </button>
+      </div>
+
+      <!-- GAME VIEW A: MANUAL SORT CHALLENGE -->
+      <div class="arcade-card" id="arcadeViewManual">
+        <div class="arcade-card-header">
+          <div>
+            <h3 style="font-size: 1.35rem; margin-bottom: 0.25rem;">Manual Sort Challenge: Master the Invariants</h3>
+            <p style="font-size: 0.88rem; color: var(--ink-secondary);">
+              Click two adjacent tiles to compare and swap them, following your chosen algorithm's rules.
+            </p>
+          </div>
+          <div class="game-stats-pill">
+            <span>Moves: <strong id="gameMoveCount" style="color: var(--band-visualizer);">0</strong></span>
+            <span>Comps: <strong id="gameCompCount">0</strong></span>
+            <span>Target: <strong id="gameTargetPar">6</strong></span>
+            <span>Rating: <strong id="gameStarRating">⭐⭐⭐</strong></span>
+          </div>
+        </div>
+
+        <!-- Algorithm Rules Filter -->
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; align-items: center;">
+          <span class="mono" style="font-size: 0.78rem; font-weight: 700; color: var(--ink-muted);">RULES ENGINE:</span>
+          <button type="button" class="btn btn-sm btn-preset active" id="btnGameRuleBubble">Bubble Sort (Adjacent Swaps)</button>
+          <button type="button" class="btn btn-sm btn-preset" id="btnGameRuleSelection">Selection Sort (Find Min & Place)</button>
+          <button type="button" class="btn btn-sm btn-preset" id="btnGameRuleFree">Free Puzzle (Any 2 Tiles)</button>
+        </div>
+
+        <!-- The Interactive Game Tiles Arena -->
+        <div class="game-tiles-arena" id="gameTilesArena">
+          <!-- Populated dynamically with interactive tiles -->
+        </div>
+
+        <!-- Game Feedback & Action Strip -->
+        <div class="game-actions-strip">
+          <div id="gameFeedbackBanner" class="game-feedback-text">
+            👉 Click on any two tiles above to compare and swap them into ascending order!
+          </div>
+          <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+            <button type="button" class="btn btn-sm" id="btnGameHint">
+              <span>💡 Need a Hint?</span>
+            </button>
+            <button type="button" class="btn btn-sm btn-secondary" id="btnGameCheck">
+              <span>✓ Check If Sorted</span>
+            </button>
+            <button type="button" class="btn btn-sm btn-primary" id="btnGameNewShuffle">
+              <span>🎲 New Shuffle</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- GAME VIEW B: ALGORITHM BATTLE ROYALE (BET & RACE) -->
+      <div class="arcade-card" id="arcadeViewBattle" style="display: none;">
+        <div class="arcade-card-header">
+          <div>
+            <h3 style="font-size: 1.35rem; margin-bottom: 0.25rem;">Algorithm Battle Royale: Wager on Complexity</h3>
+            <p style="font-size: 0.88rem; color: var(--ink-secondary);">
+              Analyze the input condition, place your bet on who finishes with the fewest comparisons, and watch them race live!
+            </p>
+          </div>
+          <div class="game-stats-pill">
+            <span>Streak: <strong id="battleStreakCount" style="color: #D98200;">🔥 0</strong></span>
+            <span>Wager Reward: <strong style="color: var(--bar-sorted);">+100 XP</strong></span>
+          </div>
+        </div>
+
+        <!-- Setup Track -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1rem; margin-bottom: 1.25rem;">
+          <div style="background: var(--paper-surface); border: var(--border-ink); padding: 1rem; border-radius: var(--radius-lg);">
+            <label style="display: block; font-family: var(--font-mono); font-size: 0.75rem; font-weight: 800; text-transform: uppercase; margin-bottom: 0.4rem; color: var(--ink-muted);">
+              1. Choose Dataset Scenario
+            </label>
+            <select id="battleScenarioSelect" class="text-input-field" style="padding: 0.55rem 0.85rem; font-size: 0.88rem;">
+              <option value="reverse">Monotone Reverse-Sorted (Worst Case for Bubble &amp; Insertion)</option>
+              <option value="nearly_sorted">Nearly Sorted 90% (Insertion &amp; Adaptive Advantage)</option>
+              <option value="duplicates">Many Duplicates (Quick vs Merge Stability test)</option>
+              <option value="random">Random Shuffled N = 120 (Standard Benchmark)</option>
+            </select>
+          </div>
+
+          <div style="background: var(--paper-surface); border: var(--border-ink); padding: 1rem; border-radius: var(--radius-lg);">
+            <label style="display: block; font-family: var(--font-mono); font-size: 0.75rem; font-weight: 800; text-transform: uppercase; margin-bottom: 0.4rem; color: var(--ink-muted);">
+              2. Place Your Bet (Predicted Winner)
+            </label>
+            <select id="battleChampionSelect" class="text-input-field" style="padding: 0.55rem 0.85rem; font-size: 0.88rem;">
+              <option value="4">Adaptive Sort (Introsort / Run-Merger)</option>
+              <option value="2">Quick Sort (Median-of-Three)</option>
+              <option value="1">Merge Sort (Top-Down)</option>
+              <option value="3">Heap Sort (In-Place)</option>
+              <option value="0">Insertion Sort</option>
+              <option value="7">Shell Sort (Diminishing Gap)</option>
+              <option value="8">Counting Sort</option>
+              <option value="9">Radix Sort (LSD)</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; margin-bottom: 1rem;">
+          <button type="button" class="btn btn-primary" id="btnStartBattleRoyale">
+            <span>🏁 Launch Battle Royale Race!</span>
+          </button>
+        </div>
+
+        <!-- 4 Race Tracks Arena -->
+        <div class="battle-tracks-container" id="battleTracksContainer">
+          <!-- Populated dynamically during race -->
+        </div>
+
+        <!-- Battle Podium -->
+        <div id="battlePodiumBanner" class="battle-podium-banner" style="display: none;">
+          <!-- Displayed at end of race -->
+        </div>
+      </div>
+
+      <!-- GAME VIEW C: NEXT MOVE PREDICTOR DUEL -->
+      <div class="arcade-card" id="arcadeViewDuel" style="display: none;">
+        <div class="arcade-card-header">
+          <div>
+            <h3 style="font-size: 1.35rem; margin-bottom: 0.25rem;">Step Predictor Duel: Quick-Fire Invariants</h3>
+            <p style="font-size: 0.88rem; color: var(--ink-secondary);">
+              Predict the algorithm's next mutation under pressure! Build combos to level up your sorting rank.
+            </p>
+          </div>
+          <div class="game-stats-pill">
+            <span>Round: <strong id="duelRoundText">1 / 5</strong></span>
+            <span>Score: <strong id="duelScoreText" style="color: var(--bar-sorted);">0</strong></span>
+            <span>Multiplier: <strong id="duelMultiplierText" style="color: var(--band-visualizer);">x1</strong></span>
+          </div>
+        </div>
+
+        <div class="duel-challenge-card" id="duelChallengeCard">
+          <div class="duel-question-title" id="duelQuestionTitle">
+            Loading challenge question...
+          </div>
+          <div class="duel-options-grid" id="duelOptionsGrid">
+            <!-- Populated dynamically -->
+          </div>
+          <div class="duel-feedback-box" id="duelFeedbackBox" style="display: none;"></div>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; margin-top: 1rem;">
+          <button type="button" class="btn btn-secondary" id="btnNextDuelQuestion" style="display: none;">
+            <span>Next Challenge &rarr;</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         SECTION 03: LEARN (STUDY MONOGRAPH WITH ALL 10 ALGORITHMS)
+         ======================================================================= -->
+    <section class="lab-section" id="sec-learn">
+      <div class="section-header band-learn">
+        <div>
+          <div class="section-label">03 // DSA Study Monograph</div>
+          <h2 class="section-title">Theoretical Guide &amp; Viva Voce Defense</h2>
+        </div>
+        <div class="section-marginalia">
+          Complete conceptual breakdown, real-life analogies, worked step-by-step examples,
+          full C++ code with comments, complexity tables, viva questions, and interactive quizzes for all 10 algorithms.
+        </div>
+      </div>
+
+      <!-- Algorithm Study Tabs: All 10 Algorithms -->
+      <div class="learn-algo-tabs" id="learnAlgoTabs">
+        <button type="button" class="learn-tab-btn active" data-algo="0">Insertion</button>
+        <button type="button" class="learn-tab-btn" data-algo="1">Merge</button>
+        <button type="button" class="learn-tab-btn" data-algo="2">Quick</button>
+        <button type="button" class="learn-tab-btn" data-algo="3">Heap</button>
+        <button type="button" class="learn-tab-btn" data-algo="4">Adaptive</button>
+        <button type="button" class="learn-tab-btn" data-algo="5">Bubble</button>
+        <button type="button" class="learn-tab-btn" data-algo="6">Selection</button>
+        <button type="button" class="learn-tab-btn" data-algo="7">Shell</button>
+        <button type="button" class="learn-tab-btn" data-algo="8">Counting</button>
+        <button type="button" class="learn-tab-btn" data-algo="9">Radix (LSD)</button>
+      </div>
+
+      <!-- Dynamic Study Block Container -->
+      <div id="studyBlockContainer">
+        <!-- Rendered dynamically by app.js -->
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         SECTION 04: COMPARE (ASSIGNMENT REQUIREMENTS & EMPIRICAL BENCHMARKS)
+         ======================================================================= -->
+    <section class="lab-section" id="sec-compare">
+      <div class="section-header band-compare">
+        <div>
+          <div class="section-label">04 // Empirical Assessment</div>
+          <h2 class="section-title">Benchmark Suite &amp; Behavior Matrix</h2>
+        </div>
+        <div class="section-marginalia">
+          Evaluates all 10 algorithms across Sorted, Reverse, Nearly Sorted, Random, and Duplicate-heavy data,
+          with empirical growth curves up to N = 50,000.
+        </div>
+      </div>
+
+      <!-- Formal Assignment Problem Statement -->
+      <div class="problem-banner">
+        <div class="problem-banner-title">Project Problem Statement</div>
+        <div class="problem-banner-text">
+          &ldquo;Implement merge sort, quicksort, heap sort, insertion sort, and an adaptive sorting approach.
+          Compare execution time, comparisons, memory use, and behavior on sorted data.&rdquo;
+        </div>
+      </div>
+
+      <!-- Benchmark Actions -->
+      <div class="intro-strip" style="margin-bottom: 1rem;">
+        <div style="font-family: var(--font-mono); font-size: 0.88rem;">
+          <span style="color: var(--ink-muted);">DATASET SPECIMEN:</span>
+          <strong id="benchmarkTargetInfo">Current Input Sequence (Median of 7 Trials)</strong>
+        </div>
+
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+          <button type="button" class="btn btn-sm btn-primary" id="btnRunBenchmarkSuite">
+            <span>&#9654; Run 10-Algorithm Benchmark Suite</span>
+          </button>
+          <button type="button" class="btn btn-sm" id="btnExportCsv">
+            <span>&darr; Export CSV</span>
+          </button>
+          <button type="button" class="btn btn-sm" id="btnCopyReport">
+            <span>&#9112; Copy Lab Report</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Benchmark Results Table -->
+      <div class="benchmark-table-wrapper">
+        <table class="notebook-table" id="benchmarkTable">
+          <thead>
+            <tr>
+              <th>Algorithm</th>
+              <th>Execution Time (Median of 7)</th>
+              <th>Comparisons</th>
+              <th>Swaps / Moves</th>
+              <th>Auxiliary Memory</th>
+              <th>Max Depth</th>
+              <th>Correctness</th>
+              <th>Efficiency Rank</th>
+            </tr>
+          </thead>
+          <tbody id="benchmarkTableBody">
+            <!-- Populated dynamically -->
+          </tbody>
+        </table>
+      </div>
+
+      <p id="benchmarkNoteFooter" style="font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-muted); margin-bottom: 2rem;">
+        * For small inputs (N &lt; 100), execution duration is sub-microsecond and ranked by total comparisons + swaps. Median of 7 runs with accumulated &ge; 20ms work is used to eliminate timer noise.
+      </p>
+
+      <!-- Behavior Analysis Matrix (5 Algos x 5 Distributions) with Heat Scale -->
+      <h3 style="font-size: 1.4rem; margin-top: 1.5rem; margin-bottom: 0.5rem;">Behavior Analysis Matrix (5 &times; 5 Grid, N = 200)</h3>
+      <p style="font-size: 15px; margin-bottom: 1rem;">
+        Color heat scale: <strong>Green</strong> = fastest in distribution, <strong>Cream/Amber</strong> = moderate, <strong>Red</strong> = slowest.
+      </p>
+
+      <div class="matrix-wrapper">
+        <table class="matrix-table" id="matrixTable">
+          <thead>
+            <tr>
+              <th>Algorithm</th>
+              <th>Random Data</th>
+              <th>Sorted Data</th>
+              <th>Reverse Sorted</th>
+              <th>Nearly Sorted (95%)</th>
+              <th>Many Duplicates</th>
+            </tr>
+          </thead>
+          <tbody id="matrixTableBody">
+            <!-- Populated dynamically -->
+          </tbody>
+        </table>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; margin-bottom: 2rem;">
+        <button type="button" class="btn btn-sm btn-secondary" id="btnRunFullMatrix">
+          <span>Recompute 5 &times; 5 Matrix</span>
+        </button>
+      </div>
+
+      <!-- Growth Chart: Time vs Size (100, 1k, 10k, 50k) -->
+      <div class="figure-card">
+        <div class="figure-caption">
+          <span><strong>Fig. 1:</strong> Execution Time vs Input Size (N &in; [100, 1k, 10k, 50k])</span>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <label style="font-family: var(--font-mono); font-size: 0.78rem; font-weight: 700; cursor: pointer;">
+              <input type="checkbox" id="chkLogScale" style="accent-color: var(--band-compare);"> Logarithmic Y-Axis
+            </label>
+            <span id="chartLoadingBadge" style="display: none; color: var(--band-visualizer); font-weight: 700;">Computing...</span>
+          </div>
+        </div>
+        <div class="figure-chart-stage">
+          <canvas id="chartScaling"></canvas>
+        </div>
+      </div>
+
+      <!-- Plain-English Auto-Generated Conclusions -->
+      <h3 style="font-size: 1.4rem; margin-top: 2rem; margin-bottom: 0.5rem;">Auto-Generated Empirical Conclusions</h3>
+      <div id="insightsFeed" style="display: flex; flex-direction: column; gap: 0.75rem;">
+        <!-- Populated dynamically -->
+      </div>
+    </section>
+
+    <!-- =======================================================================
+         SECTION 05: ABOUT SECTION
+         ======================================================================= -->
+    <section class="lab-section" id="sec-about">
+      <div class="section-header band-about">
+        <div>
+          <div class="section-label">05 // Project Credentials</div>
+          <h2 class="section-title">About SortLab</h2>
+        </div>
+        <div class="section-marginalia">
+          Course affiliation, student authors, academic problem statement, and technology architecture.
+        </div>
+      </div>
+
+      <div class="strip-card">
+        <h3 style="font-size: 1.6rem; margin-bottom: 0.75rem;">SortLab: Adaptive Sorting Algorithm Benchmarking Tool</h3>
+        <p style="margin-bottom: 1.5rem;">
+          SortLab was developed as a comprehensive Data Structures &amp; Algorithms mini-project workbench.
+          It provides high-precision empirical benchmarking, interactive step-by-step visual dissection,
+          and theoretical study materials for DSA university examinations and viva voce defense.
+        </p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem;">
+          <div style="background: var(--paper-surface); border: var(--border-ink); padding: 1.25rem; border-radius: var(--radius-lg);">
+            <div style="font-family: var(--font-mono); font-size: 0.78rem; font-weight: 800; color: var(--band-about); text-transform: uppercase; margin-bottom: 0.4rem;">Academic Course</div>
+            <p><strong>Subject:</strong> Data Structures &amp; Algorithms (DSA)</p>
+            <p><strong>Project:</strong> Sorting Algorithms Mini-Project</p>
+            <p><strong>Focus:</strong> Comparative Invariant Analysis &amp; Empirical Benchmarking</p>
+          </div>
+
+          <div style="background: var(--paper-surface); border: var(--border-ink); padding: 1.25rem; border-radius: var(--radius-lg);">
+            <div style="font-family: var(--font-mono); font-size: 0.78rem; font-weight: 800; color: var(--band-about); text-transform: uppercase; margin-bottom: 0.4rem;">Student Authors</div>
+            <p><strong>Alex Mercer</strong> (Roll No. 2026-DSA-01)</p>
+            <p><strong>Priya Sharma</strong> (Roll No. 2026-DSA-14)</p>
+            <p><strong>David Chen</strong> (Roll No. 2026-DSA-29)</p>
+          </div>
+
+          <div style="background: var(--paper-surface); border: var(--border-ink); padding: 1.25rem; border-radius: var(--radius-lg);">
+            <div style="font-family: var(--font-mono); font-size: 0.78rem; font-weight: 800; color: var(--band-about); text-transform: uppercase; margin-bottom: 0.4rem;">Technology Architecture</div>
+            <p><strong>Core Logic:</strong> Pure C++17 (zero standard library shortcuts)</p>
+            <p><strong>Compilation:</strong> WebAssembly via Emscripten (emcc)</p>
+            <p><strong>Threading:</strong> Non-blocking Web Workers (worker.js)</p>
+            <p><strong>Interface:</strong> Vanilla HTML5, CSS3, Modern Canvas &amp; Chart.js</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- =========================================================================
+       GLOSSARY SLIDE-OVER DRAWER
+       ========================================================================= -->
+  <aside class="glossary-drawer" id="glossaryDrawer">
+    <div class="glossary-header">
+      <h3 style="font-size: 1.25rem; margin: 0;">DSA Sorting Glossary</h3>
+      <button type="button" class="btn btn-sm" id="btnCloseGlossary">&times; Close</button>
+    </div>
+    <div class="glossary-body">
+      <div class="glossary-item">
+        <div class="glossary-term">In-Place Algorithm</div>
+        <p>An algorithm that sorts the elements within the input array itself, requiring at most a small constant amount of auxiliary memory (O(1) extra space, or O(log n) call stack).</p>
+      </div>
+      <div class="glossary-item">
+        <div class="glossary-term">Stable Sort</div>
+        <p>A sorting algorithm that preserves the relative order of duplicate elements with identical keys as they originally appeared in the input.</p>
+      </div>
+      <div class="glossary-item">
+        <div class="glossary-term">Comparison Sort</div>
+        <p>An algorithm that determines order strictly through element-to-element comparisons (e.g. A &lt; B). Theoretical information theory bounds state that no comparison sort can run faster than &Omega;(n log n) in the worst case.</p>
+      </div>
+      <div class="glossary-item">
+        <div class="glossary-term">Pivot</div>
+        <p>A selected benchmark element used in Quick Sort to partition the array into elements smaller than the pivot and elements greater than the pivot.</p>
+      </div>
+      <div class="glossary-item">
+        <div class="glossary-term">Heapify (SiftDown)</div>
+        <p>The operation that restores the binary max-heap property by sifting down a root node that is smaller than either of its child nodes until the heap invariant is satisfied.</p>
+      </div>
+      <div class="glossary-item">
+        <div class="glossary-term">Inversion</div>
+        <p>A pair of elements (arr[i], arr[j]) such that i &lt; j but arr[i] &gt; arr[j]. The number of inversions measures how far an array is from being sorted.</p>
+      </div>
+      <div class="glossary-item">
+        <div class="glossary-term">Recursion Depth</div>
+        <p>The maximum number of simultaneous stack frames created by recursive function calls. For balanced QuickSort, depth is O(log n); in worst-case it can reach O(n).</p>
+      </div>
+      <div class="glossary-item">
+        <div class="glossary-term">Big-O Notation</div>
+        <p>Mathematical notation describing the asymptotic upper bound of an algorithm's growth rate in terms of execution time or memory space as input size n approaches infinity.</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Toast Notification -->
+  <div class="lab-toast" id="labToast">Report copied to clipboard!</div>
+
+  <!-- Chart.js for Scientific Figures (CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- Master Application Script -->
+  <script src="app.js"></script>
+</body>
+</html>

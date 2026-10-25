@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+package-lock.json
+
+# C++ Executables & Object files
+*.exe
+*.obj
+*.o
+*.out
+*.app
+cpp/*.exe
+cpp/sorting_benchmark.exe
+
+# Temporary files & logs
+*.log
+build_app.js
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE & Editor settings
+.vscode/
+.idea/
+*.suo
+*.user
+
+# Vercel deployment cache
+.vercel/
