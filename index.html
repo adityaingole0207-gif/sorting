@@ -24,12 +24,12 @@
         <span class="nav-brand-id">DSA STUDY BENCHMARK</span>
       </a>
 
-      <ul class="nav-toc">
-        <li><a href="#sec-visualizer" class="active"><span class="nav-toc-num">01</span> Visualizer</a></li>
-        <li><a href="#sec-arcade"><span class="nav-toc-num">02</span> Arcade 🎮</a></li>
-        <li><a href="#sec-learn"><span class="nav-toc-num">03</span> Learn</a></li>
-        <li><a href="#sec-compare"><span class="nav-toc-num">04</span> Compare</a></li>
-        <li><a href="#sec-about"><span class="nav-toc-num">05</span> About</a></li>
+      <ul class="nav-toc" role="menubar">
+        <li role="none"><a href="#sec-visualizer" class="active" role="menuitem"><span class="nav-toc-num">01</span> Visualizer</a></li>
+        <li role="none"><a href="#sec-arcade" role="menuitem" style="white-space: nowrap;"><span class="nav-toc-num">02</span> Arcade&nbsp;🎮</a></li>
+        <li role="none"><a href="#sec-learn" role="menuitem"><span class="nav-toc-num">03</span> Learn</a></li>
+        <li role="none"><a href="#sec-compare" role="menuitem"><span class="nav-toc-num">04</span> Compare</a></li>
+        <li role="none"><a href="#sec-about" role="menuitem"><span class="nav-toc-num">05</span> About</a></li>
       </ul>
 
       <div class="nav-right-tools">
@@ -50,8 +50,13 @@
           <span>📖 Glossary</span>
         </button>
 
+        <!-- Reset Progress Button -->
+        <button type="button" class="btn btn-sm btn-outline-danger" id="btnResetProgress" title="Reset all SortLab XP, level, quizzes, and history" aria-label="Reset all progress">
+          <span>🔄 Reset</span>
+        </button>
+
         <!-- Light / Dark Theme Toggle Button -->
-        <button type="button" class="btn btn-sm" id="btnToggleTheme" title="Toggle Light/Dark Mode">
+        <button type="button" class="btn btn-sm" id="btnToggleTheme" title="Toggle Light/Dark Mode" aria-label="Toggle theme">
           <span id="themeToggleIcon">🌓 Theme</span>
         </button>
       </div>
@@ -346,6 +351,12 @@
           <!-- Big Transport Bar below Canvas -->
           <div class="transport-bar">
             <div class="transport-actions">
+              <div class="kbd-hints-pill" title="Keyboard Shortcuts" aria-label="Keyboard Shortcuts: Space Play/Pause, Left Prev, Right Next, R Restart">
+                <span class="kbd-key">Space</span> Play/Pause &bull;
+                <span class="kbd-key">&larr;</span> Prev &bull;
+                <span class="kbd-key">&rarr;</span> Next &bull;
+                <span class="kbd-key">R</span> Restart
+              </div>
               <button type="button" class="btn btn-primary" id="btnVizPrimary">
                 <span id="vizPlayIcon">&#9658;</span> <span id="vizPlayText">Visualize</span>
               </button>
@@ -392,18 +403,46 @@
           </div>
         </div>
 
-        <!-- RIGHT: SYNCHRONIZED CODE PANEL (40% WIDTH, STICKY, 520PX FIXED HEIGHT) -->
+        <!-- RIGHT: SYNCHRONIZED CODE & STEP-BY-STEP LOG PANEL (40% WIDTH, STICKY, 520PX FIXED HEIGHT) -->
         <div class="code-viewer-column">
           <div class="code-viewer-card">
             <div class="code-viewer-header">
-              <span class="code-title" id="codeViewerTitle">C++ Implementation</span>
-              <div class="code-lang-toggle">
+              <div class="code-view-tabs" role="tablist">
+                <button type="button" class="tab-btn active" id="tabBtnCode" role="tab" aria-selected="true" aria-controls="codeScrollBody">C++ Code</button>
+                <button type="button" class="tab-btn" id="tabBtnSteps" role="tab" aria-selected="false" aria-controls="stepsLogView">Steps Log (<span id="stepsCountBadge">0</span>)</button>
+                <button type="button" class="tab-btn" id="tabBtnHistory" role="tab" aria-selected="false" aria-controls="historyLogView">Run History (<span id="historyCountBadge">0</span>)</button>
+              </div>
+              <div class="code-lang-toggle" id="codeLangToggleGroup">
                 <button type="button" class="lang-btn active" id="btnToggleCpp">C++</button>
                 <button type="button" class="lang-btn" id="btnTogglePseudo">Pseudocode</button>
               </div>
+              <div class="steps-action-group" id="stepsActionGroup" style="display: none;">
+                <button type="button" class="btn btn-xs" id="btnCopySteps" title="Copy all steps to clipboard">📋 Copy</button>
+                <button type="button" class="btn btn-xs" id="btnDownloadStepsTxt" title="Download steps as plain text (.txt)">💾 .txt</button>
+                <button type="button" class="btn btn-xs" id="btnDownloadStepsMd" title="Download steps as Markdown (.md)">💾 .md</button>
+              </div>
+              <div class="history-action-group" id="historyActionGroup" style="display: none;">
+                <button type="button" class="btn btn-xs btn-outline-danger" id="btnClearHistory" title="Clear all saved run history">🗑️ Clear</button>
+              </div>
             </div>
-            <div class="code-scroll-body" id="codeScrollBody">
+
+            <!-- TAB VIEW 1: SYNCHRONIZED SOURCE CODE -->
+            <div class="code-scroll-body" id="codeScrollBody" role="tabpanel" aria-labelledby="tabBtnCode">
               <!-- Synchronized lines populated by app.js -->
+            </div>
+
+            <!-- TAB VIEW 2: SCROLLABLE STEP-BY-STEP LOG (CLICK TO JUMP) -->
+            <div class="steps-log-body" id="stepsLogView" role="tabpanel" aria-labelledby="tabBtnSteps" style="display: none;">
+              <div class="steps-log-list" id="stepsLogList">
+                <div class="steps-empty-hint">Press "Visualize" or step through sorting to generate step-by-step logs.</div>
+              </div>
+            </div>
+
+            <!-- TAB VIEW 3: RUN HISTORY LIST (SAVED RUNS CAN BE REOPENED) -->
+            <div class="history-log-body" id="historyLogView" role="tabpanel" aria-labelledby="tabBtnHistory" style="display: none;">
+              <div class="history-run-list" id="historyRunList">
+                <div class="steps-empty-hint">No past runs saved yet. Execute a sort to record it in your history.</div>
+              </div>
             </div>
           </div>
 
@@ -642,6 +681,39 @@
         </div>
       </div>
 
+      <!-- STATIC THEORY COMPARISON TABLE (SHOWN IMMEDIATELY ON LOAD, SORTABLE COLUMNS) -->
+      <div class="theory-section-wrap" style="margin-bottom: 2rem;">
+        <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.65rem; flex-wrap: wrap; gap: 0.5rem;">
+          <div>
+            <h3 style="font-size: 1.45rem; margin-bottom: 0.2rem;">Theoretical Complexity &amp; Algorithmic Properties</h3>
+            <p style="font-size: 14px; color: var(--ink-muted); margin: 0;">Comprehensive academic reference for all 10 DSA sorting algorithms. Click any column header to sort.</p>
+          </div>
+          <span class="mono" style="font-size: 0.8rem; color: var(--ink-muted); background: var(--paper-subtle); padding: 4px 10px; border-radius: var(--radius-pill); border: 1px solid var(--ink-border);">
+            10 Algorithms &bull; Sticky 1st Col &bull; Sortable
+          </span>
+        </div>
+        <div class="table-scroll-wrap">
+          <table class="notebook-table theory-table" id="theoryTable">
+            <thead>
+              <tr>
+                <th data-sort="algo" class="sortable-th" scope="col">Algorithm <span class="sort-icon">↕</span></th>
+                <th data-sort="best" class="sortable-th" scope="col">Best Case <span class="sort-icon">↕</span></th>
+                <th data-sort="avg" class="sortable-th" scope="col">Average Case <span class="sort-icon">↕</span></th>
+                <th data-sort="worst" class="sortable-th" scope="col">Worst Case <span class="sort-icon">↕</span></th>
+                <th data-sort="space" class="sortable-th" scope="col">Aux Space <span class="sort-icon">↕</span></th>
+                <th data-sort="stable" class="sortable-th" scope="col">Stable <span class="sort-icon">↕</span></th>
+                <th data-sort="inPlace" class="sortable-th" scope="col">In-Place <span class="sort-icon">↕</span></th>
+                <th data-sort="adaptive" class="sortable-th" scope="col">Adaptive <span class="sort-icon">↕</span></th>
+                <th data-sort="useCase" scope="col">Best Use Case</th>
+              </tr>
+            </thead>
+            <tbody id="theoryTableBody">
+              <!-- Populated dynamically on load by app.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <!-- Formal Assignment Problem Statement -->
       <div class="problem-banner">
         <div class="problem-banner-title">Project Problem Statement</div>
@@ -671,6 +743,11 @@
         </div>
       </div>
 
+      <!-- Winner Summary Strip (Fastest, Fewest Comparisons, Least Memory) -->
+      <div class="winner-summary-banner" id="benchmarkWinnerSummary" style="display: none;">
+        <!-- Populated dynamically -->
+      </div>
+
       <!-- Benchmark Results Table -->
       <div class="benchmark-table-wrapper">
         <table class="notebook-table" id="benchmarkTable">
@@ -692,9 +769,9 @@
         </table>
       </div>
 
-      <p id="benchmarkNoteFooter" style="font-family: var(--font-mono); font-size: 0.82rem; color: var(--ink-muted); margin-bottom: 2rem;">
-        * For small inputs (N &lt; 100), execution duration is sub-microsecond and ranked by total comparisons + swaps. Median of 7 runs with accumulated &ge; 20ms work is used to eliminate timer noise.
-      </p>
+      <div class="benchmark-rank-footnote" id="benchmarkRankFootnote">
+        ℹ️ <strong>Rank Calculation:</strong> For specimen arrays with N &lt; 1,000, efficiency ranking is determined by total discrete algorithmic operations (comparisons + swaps/moves) to eliminate sub-millisecond OS timer resolution noise; for large arrays (N &ge; 1,000), ranking is determined strictly by median execution time.
+      </div>
 
       <!-- Behavior Analysis Matrix (5 Algos x 5 Distributions) with Heat Scale -->
       <h3 style="font-size: 1.4rem; margin-top: 1.5rem; margin-bottom: 0.5rem;">Behavior Analysis Matrix (5 &times; 5 Grid, N = 200)</h3>
@@ -781,9 +858,9 @@
 
           <div style="background: var(--paper-surface); border: var(--border-ink); padding: 1.25rem; border-radius: var(--radius-lg);">
             <div style="font-family: var(--font-mono); font-size: 0.78rem; font-weight: 800; color: var(--band-about); text-transform: uppercase; margin-bottom: 0.4rem;">Student Authors</div>
-            <p><strong>Alex Mercer</strong> (Roll No. 2026-DSA-01)</p>
-            <p><strong>Priya Sharma</strong> (Roll No. 2026-DSA-14)</p>
-            <p><strong>David Chen</strong> (Roll No. 2026-DSA-29)</p>
+            <div id="aboutAuthorsContainer">
+              <!-- Populated dynamically from PROJECT_CONFIG in app.js -->
+            </div>
           </div>
 
           <div style="background: var(--paper-surface); border: var(--border-ink); padding: 1.25rem; border-radius: var(--radius-lg);">

@@ -2208,3 +2208,454 @@ body.dark-mode .battle-podium-banner {
     scroll-behavior: auto !important;
   }
 }
+
+
+/* ============================================================================
+   NEW STYLES: TABS, STEPS LOG, RUN HISTORY, THEORY TABLE & ACCESSIBILITY
+   ============================================================================ */
+
+/* 1. Nav & Reset Button */
+.nav-toc {
+  white-space: nowrap !important;
+  flex-shrink: 0;
+}
+
+.nav-toc li {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.nav-toc a {
+  white-space: nowrap !important;
+}
+
+.btn-outline-danger {
+  color: #DC2626 !important;
+  border-color: rgba(220, 38, 38, 0.3) !important;
+  background: transparent !important;
+}
+
+.btn-outline-danger:hover {
+  background: rgba(220, 38, 38, 0.08) !important;
+  border-color: #DC2626 !important;
+}
+
+/* 2. Keyboard Shortcuts Pill */
+.kbd-hints-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  color: var(--ink-muted);
+  background: var(--paper-surface);
+  border: 1px solid var(--ink-border);
+  padding: 4px 10px;
+  border-radius: var(--radius-pill);
+  user-select: none;
+}
+
+.kbd-key {
+  display: inline-block;
+  padding: 1px 5px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--ink-primary);
+  background: var(--paper-subtle);
+  border: 1px solid var(--ink-border);
+  border-radius: 4px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
+}
+
+/* 3. Right Workspace Panel: Code / Steps / History Tabs */
+.code-view-tabs {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: var(--paper-surface);
+  padding: 3px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--ink-border);
+}
+
+.tab-btn {
+  background: transparent;
+  border: none;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--ink-muted);
+  padding: 4px 9px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.tab-btn:hover {
+  color: var(--ink-primary);
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.tab-btn.active {
+  color: var(--ink-primary);
+  background: var(--paper-card);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+body.dark-mode .tab-btn.active {
+  background: var(--paper-highlight);
+  color: #FFF;
+}
+
+.btn-xs {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  padding: 3px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  background: var(--paper-card);
+  border: 1px solid var(--ink-border);
+  color: var(--ink-primary);
+  transition: all 0.15s ease;
+}
+
+.btn-xs:hover {
+  background: var(--paper-surface);
+  border-color: var(--ink-primary);
+}
+
+/* 4. Steps Log Scrollable View */
+.steps-log-body, .history-log-body {
+  height: 460px;
+  overflow-y: auto;
+  padding: 0.75rem;
+  background: var(--paper-surface);
+}
+
+.steps-log-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.steps-empty-hint {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--ink-muted);
+  text-align: center;
+  padding: 3rem 1.5rem;
+}
+
+.step-log-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding: 0.6rem 0.85rem;
+  background: var(--paper-card);
+  border: 1px solid var(--ink-rule);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.12s ease;
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.step-log-item:hover {
+  border-color: var(--band-visualizer);
+  background: var(--paper-highlight);
+  transform: translateX(2px);
+}
+
+.step-log-item.active-step {
+  border-color: var(--band-visualizer);
+  background: var(--accent-vermilion-subtle);
+  box-shadow: 0 0 0 1px var(--band-visualizer);
+}
+
+body.dark-mode .step-log-item.active-step {
+  background: rgba(226, 70, 31, 0.15);
+  border-color: var(--band-visualizer);
+}
+
+.step-log-num {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: var(--ink-muted);
+  min-width: 44px;
+}
+
+.step-log-badge {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.badge-op-compare { background: #FEF3C7; color: #B45309; }
+.badge-op-swap { background: #DBEAFE; color: #1D4ED8; }
+.badge-op-shift { background: #E0E7FF; color: #4338CA; }
+.badge-op-pivot { background: #FEF9C3; color: #854D0E; }
+.badge-op-sorted { background: #DCFCE7; color: #15803D; }
+
+.step-log-msg {
+  flex: 1;
+  color: var(--ink-primary);
+}
+
+/* 5. Run History View */
+.history-run-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.history-run-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1rem;
+  background: var(--paper-card);
+  border: 1px solid var(--ink-border);
+  border-radius: var(--radius-md);
+  transition: all 0.15s ease;
+}
+
+.history-run-card:hover {
+  border-color: var(--band-compare);
+  box-shadow: var(--shadow-flat-sm);
+}
+
+.history-run-title {
+  font-weight: 700;
+  font-size: 0.95rem;
+  margin-bottom: 0.2rem;
+}
+
+.history-run-meta {
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  color: var(--ink-muted);
+}
+
+/* 6. Static Theory Comparison Table */
+.theory-section-wrap {
+  background: var(--paper-card);
+  border: var(--border-ink);
+  border-radius: var(--radius-xl);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-flat);
+}
+
+.table-scroll-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  max-width: 100%;
+}
+
+.theory-table th.sortable-th {
+  cursor: pointer;
+  user-select: none;
+  transition: background-color 0.15s ease;
+}
+
+.theory-table th.sortable-th:hover {
+  background-color: var(--paper-subtle);
+  color: var(--band-compare);
+}
+
+.sort-icon {
+  font-size: 0.72rem;
+  opacity: 0.6;
+  margin-left: 3px;
+}
+
+.theory-table th:first-child,
+.theory-table td:first-child {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background-color: var(--paper-surface);
+  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.04);
+}
+
+body.dark-mode .theory-table th:first-child,
+body.dark-mode .theory-table td:first-child {
+  background-color: var(--paper-card);
+}
+
+/* Badges for Yes / No */
+.badge-yes {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background-color: #E8F5E9;
+  color: #1B5E20;
+  border: 1px solid rgba(27, 94, 32, 0.2);
+}
+
+.badge-no {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background-color: #FFEBEE;
+  color: #B71C1C;
+  border: 1px solid rgba(183, 28, 28, 0.2);
+}
+
+.badge-partial {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  background-color: #FFF8E1;
+  color: #B78103;
+  border: 1px solid rgba(183, 129, 3, 0.2);
+}
+
+/* 7. Winner Summary Strip above Benchmark Table */
+.winner-summary-banner {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--paper-card);
+  border: 1px solid var(--bar-sorted);
+  padding: 0.85rem 1.25rem;
+  border-radius: var(--radius-lg);
+  margin-bottom: 1rem;
+  box-shadow: var(--shadow-flat-sm);
+}
+
+.winner-summary-title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 800;
+  font-size: 0.92rem;
+  color: var(--bar-sorted);
+}
+
+.winner-summary-items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.winner-item-pill {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  padding: 4px 10px;
+  background: var(--paper-surface);
+  border: 1px solid var(--ink-border);
+  border-radius: var(--radius-pill);
+}
+
+/* 8. Cell Highlights in Benchmark Table */
+.best-cell-time {
+  background-color: rgba(16, 185, 129, 0.12) !important;
+  color: var(--bar-sorted) !important;
+  font-weight: 800 !important;
+}
+
+.best-cell-comps {
+  background-color: rgba(14, 124, 111, 0.12) !important;
+  color: var(--band-compare) !important;
+  font-weight: 800 !important;
+}
+
+.best-cell-swaps {
+  background-color: rgba(31, 58, 95, 0.12) !important;
+  color: var(--band-about) !important;
+  font-weight: 800 !important;
+}
+
+.best-cell-mem {
+  background-color: rgba(217, 130, 0, 0.12) !important;
+  color: var(--band-learn) !important;
+  font-weight: 800 !important;
+}
+
+/* 9. Footnote */
+.benchmark-rank-footnote {
+  margin-top: 0.75rem;
+  margin-bottom: 2rem;
+  font-size: 0.84rem;
+  color: var(--ink-secondary);
+  line-height: 1.5;
+  background: var(--paper-surface);
+  padding: 0.65rem 1rem;
+  border-radius: var(--radius-sm);
+  border-left: 3px solid var(--band-compare);
+}
+
+/* 10. Loading Skeleton Rows */
+.skeleton-row td {
+  padding: 1rem 0.75rem;
+}
+
+.skeleton-box {
+  height: 14px;
+  background: linear-gradient(90deg, rgba(0, 0, 0, 0.05) 25%, rgba(0, 0, 0, 0.1) 50%, rgba(0, 0, 0, 0.05) 75%);
+  background-size: 200% 100%;
+  animation: skeletonShimmer 1.5s infinite;
+  border-radius: 4px;
+}
+
+body.dark-mode .skeleton-box {
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.04) 25%, rgba(255, 255, 255, 0.08) 50%, rgba(255, 255, 255, 0.04) 75%);
+  background-size: 200% 100%;
+}
+
+@keyframes skeletonShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* 11. WCAG AA Contrast & Responsive 360px Safeguard */
+body {
+  overflow-x: hidden;
+}
+
+@media (max-width: 768px) {
+  .lab-nav-inner {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .nav-toc {
+    overflow-x: auto;
+    max-width: 100%;
+  }
+  .intro-strip {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .visualizer-control-strip {
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 480px) {
+  h1 { font-size: 28px !important; }
+  h2 { font-size: 24px !important; }
+  h3 { font-size: 20px !important; }
+  .notebook-container {
+    padding: 0 0.85rem;
+  }
+  .code-view-tabs {
+    flex-wrap: wrap;
+  }
+}

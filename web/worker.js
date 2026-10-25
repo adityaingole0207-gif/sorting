@@ -1208,13 +1208,23 @@ function measurePreciseTime(algoId, data) {
     };
 }
 
-// Generate test data for growth chart
+// Generate test data for growth chart & matrix
 function generateTestArray(size, type = 'random') {
     const arr = new Int32Array(size);
     if (type === 'sorted') {
-        for (let i = 0; i < size; i++) arr[i] = i + 1;
+        for (let i = 0; i < size; i++) arr[i] = (i + 1) * 3;
     } else if (type === 'reverse') {
-        for (let i = 0; i < size; i++) arr[i] = size - i;
+        for (let i = 0; i < size; i++) arr[i] = (size - i) * 3;
+    } else if (type === 'nearly_sorted') {
+        for (let i = 0; i < size; i++) arr[i] = (i + 1) * 3;
+        const swaps = Math.max(1, Math.floor(size / 10));
+        for (let s = 0; s < swaps; s++) {
+            const i1 = Math.floor(Math.random() * size);
+            const i2 = Math.floor(Math.random() * size);
+            const tmp = arr[i1]; arr[i1] = arr[i2]; arr[i2] = tmp;
+        }
+    } else if (type === 'duplicates') {
+        for (let i = 0; i < size; i++) arr[i] = ((i % 4) + 1) * 15;
     } else { // random
         for (let i = 0; i < size; i++) arr[i] = Math.floor(Math.random() * (size * 10)) + 1;
     }
@@ -1255,6 +1265,27 @@ self.onmessage = function (e) {
             type: 'BENCHMARK_COMPLETE',
             requestId: requestId,
             results: summary
+        });
+    } else if (msg.command === 'RUN_MATRIX') {
+        const { distributions, algoIds, requestId } = msg;
+        const matrixResults = [];
+        for (let aIdx = 0; aIdx < algoIds.length; aIdx++) {
+            const algoId = algoIds[aIdx];
+            const row = [];
+            for (let dIdx = 0; dIdx < distributions.length; dIdx++) {
+                const dist = distributions[dIdx];
+                const testData = generateTestArray(200, dist);
+                const measured = measurePreciseTime(algoId, testData);
+                measured.algoId = algoId;
+                measured.distribution = dist;
+                row.push(measured);
+            }
+            matrixResults.push(row);
+        }
+        self.postMessage({
+            type: 'MATRIX_COMPLETE',
+            requestId: requestId,
+            matrix: matrixResults
         });
     } else if (msg.command === 'RUN_GROWTH_CHART') {
         const sizes = [100, 1000, 10000, 50000];
