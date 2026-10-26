@@ -286,84 +286,49 @@ function doSwapArr(arr, i, j, line, msg, metrics, recordTrace) {
     }
 }
 
-function medianOfThree(arr, low, high, metrics, recordTrace) {
-    const mid = Math.floor(low + (high - low) / 2);
-
-    metrics.comparisons++;
-    if (arr[mid] < arr[low]) doSwapArr(arr, low, mid, 3, "Median-3: arr[mid] < arr[low], swapping.", metrics, recordTrace);
-    metrics.comparisons++;
-    if (arr[high] < arr[low]) doSwapArr(arr, low, high, 3, "Median-3: arr[high] < arr[low], swapping.", metrics, recordTrace);
-    metrics.comparisons++;
-    if (arr[high] < arr[mid]) doSwapArr(arr, mid, high, 3, "Median-3: arr[high] < arr[mid], swapping.", metrics, recordTrace);
-
-    doSwapArr(arr, low, mid, 3, `Median-3: Selected median value ${arr[mid]} as pivot at index ${low}.`, metrics, recordTrace);
-    return arr[low];
-}
-
-function hoarePartition(arr, low, high, metrics, recordTrace) {
-    const pivot = medianOfThree(arr, low, high, metrics, recordTrace);
+function lomutoPartition(arr, low, high, metrics, recordTrace) {
+    const pivot = arr[high];
     let i = low - 1;
-    let j = high + 1;
 
     if (recordTrace) {
         metrics.trace.push({
-            type: OP_PIVOT, index1: low, index2: high, value: pivot, line: 8,
-            message: `Hoare Partition: Partitioning subarray [${low}..${high}] with Pivot = ${pivot}.`,
-            snapshot: cloneArr(arr), meta: JSON.stringify({ pivot, low, high, i: low, j: high })
+            type: OP_PIVOT, index1: high, index2: -1, value: pivot, line: 9,
+            message: `Selected pivot = ${pivot} at index ${high}.`,
+            snapshot: cloneArr(arr), meta: JSON.stringify({ pivot, low, high })
         });
     }
 
-    while (true) {
-        do {
-            i++;
-            metrics.comparisons++;
-            if (recordTrace) {
-                metrics.trace.push({
-                    type: OP_COMPARE, index1: i, index2: -1, value: pivot, line: 11,
-                    message: `Left pointer i=${i}: arr[${i}] (${arr[i]}) < pivot (${pivot})? Advancing pointer.`,
-                    snapshot: cloneArr(arr), meta: JSON.stringify({ pivot, i, j, low, high })
-                });
-            }
-        } while (arr[i] < pivot);
-
-        do {
-            j--;
-            metrics.comparisons++;
-            if (recordTrace) {
-                metrics.trace.push({
-                    type: OP_COMPARE, index1: j, index2: -1, value: pivot, line: 12,
-                    message: `Right pointer j=${j}: arr[${j}] (${arr[j]}) > pivot (${pivot})? Decrementing pointer.`,
-                    snapshot: cloneArr(arr), meta: JSON.stringify({ pivot, i, j, low, high })
-                });
-            }
-        } while (arr[j] > pivot);
-
-        if (i >= j) {
-            if (recordTrace) {
-                metrics.trace.push({
-                    type: OP_PIVOT, index1: j, index2: -1, value: pivot, line: 13,
-                    message: `Pointers crossed at j=${j}. Partition established: [${low}..${j}] <= ${pivot} <= [${j + 1}..${high}].`,
-                    snapshot: cloneArr(arr), meta: JSON.stringify({ partition: j, low, high, pivot })
-                });
-            }
-            return j;
+    for (let j = low; j < high; j++) {
+        metrics.comparisons++;
+        if (recordTrace) {
+            metrics.trace.push({
+                type: OP_COMPARE, index1: j, index2: high, value: pivot, line: 12,
+                message: `Comparing arr[${j}] (${arr[j]}) with pivot (${pivot}).`,
+                snapshot: cloneArr(arr), meta: JSON.stringify({ pivot, i, j })
+            });
         }
 
-        doSwapArr(arr, i, j, 14, `Pointers stopped: Swapping arr[${i}] (${arr[i]}) and arr[${j}] (${arr[j]}) across pivot boundary.`, metrics, recordTrace);
+        if (arr[j] < pivot) {
+            i++;
+            doSwapArr(arr, i, j, 14, `arr[${j}] < pivot: swapped with arr[${i}].`, metrics, recordTrace);
+        }
     }
+
+    doSwapArr(arr, i + 1, high, 17, `Placed pivot ${pivot} into sorted position index ${i + 1}.`, metrics, recordTrace);
+    return i + 1;
 }
 
 function quickSortRecursive(arr, low, high, depth, metrics, recordTrace) {
     if (depth > metrics.maxRecursionDepth) metrics.maxRecursionDepth = depth;
     if (low < high) {
-        const p = hoarePartition(arr, low, high, metrics, recordTrace);
-        quickSortRecursive(arr, low, p, depth + 1, metrics, recordTrace);
-        quickSortRecursive(arr, p + 1, high, depth + 1, metrics, recordTrace);
+        const pi = lomutoPartition(arr, low, high, metrics, recordTrace);
+        quickSortRecursive(arr, low, pi - 1, depth + 1, metrics, recordTrace);
+        quickSortRecursive(arr, pi + 1, high, depth + 1, metrics, recordTrace);
     }
 }
 
 function quickSort(arr, metrics, recordTrace) {
-    metrics.algorithm = "Quick Sort (Med-3)";
+    metrics.algorithm = "Quick Sort";
     const n = arr.length;
     if (n <= 1) {
         metrics.auxiliaryMemoryBytes = 0;
@@ -376,7 +341,7 @@ function quickSort(arr, metrics, recordTrace) {
     if (recordTrace) {
         for (let k = 0; k < n; ++k) {
             metrics.trace.push({
-                type: OP_MARK_SORTED, index1: k, index2: -1, value: arr[k], line: 16,
+                type: OP_MARK_SORTED, index1: k, index2: -1, value: arr[k], line: 19,
                 message: "Quick Sort completed successfully.",
                 snapshot: cloneArr(arr), meta: ""
             });
@@ -512,76 +477,8 @@ function heapSortRange(arr, left, right, metrics, recordTrace) {
 }
 
 // ============================================================================
-// 5. ADAPTIVE SORT (FIXED NAMING & DIAGNOSTIC INSPECTION)
+// 5. ADAPTIVE SORT (SIMPLE 3-STEP HARD-CODED DSA LOGIC)
 // ============================================================================
-function profileInput(arr) {
-    const n = arr.length;
-    let sortedRuns = 1;
-    let isFullySorted = true;
-    let isFullyReversed = true;
-
-    for (let i = 0; i < n - 1; ++i) {
-        if (arr[i] > arr[i + 1]) {
-            isFullySorted = false;
-            sortedRuns++;
-        } else if (arr[i] < arr[i + 1]) {
-            isFullyReversed = false;
-        }
-    }
-
-    let sampleInversions = 0;
-    const stride = n < 256 ? 1 : Math.floor(n / 128);
-    for (let i = 0; i < n - stride; i += stride) {
-        if (arr[i] > arr[i + stride]) sampleInversions++;
-    }
-
-    return { size: n, sortedRuns, sampleInversions, isFullySorted, isFullyReversed };
-}
-
-function reverseArrayInPlace(arr, metrics, recordTrace) {
-    let i = 0;
-    let j = arr.length - 1;
-    while (i < j) {
-        doSwapArr(arr, i, j, 6, `Reversing: Inverting arr[${i}] (${arr[i]}) with arr[${j}] (${arr[j]}).`, metrics, recordTrace);
-        i++;
-        j--;
-    }
-}
-
-function introsortRecursive(arr, low, high, maxDepth, depth, metrics, recordTrace) {
-    if (depth > metrics.maxRecursionDepth) metrics.maxRecursionDepth = depth;
-    const count = high - low + 1;
-    if (count <= 1) return;
-
-    if (count < 16) {
-        if (recordTrace) {
-            metrics.trace.push({
-                type: OP_INFO, index1: low, index2: high, value: count, line: 8,
-                message: `Partition size ${count} < 16. Cutoff to Insertion Sort for cache speed.`,
-                snapshot: cloneArr(arr), meta: "cutoff"
-            });
-        }
-        insertionSortRange(arr, low, high, metrics, recordTrace);
-        return;
-    }
-
-    if (depth >= maxDepth) {
-        if (recordTrace) {
-            metrics.trace.push({
-                type: OP_INFO, index1: low, index2: high, value: maxDepth, line: 13,
-                message: `Recursion depth ${depth} reached cutoff 2*floor(log2(N)) = ${maxDepth}. Switching to Heap Sort to guarantee O(n log n).`,
-                snapshot: cloneArr(arr), meta: "depth_guard"
-            });
-        }
-        heapSortRange(arr, low, high, metrics, recordTrace);
-        return;
-    }
-
-    const p = hoarePartition(arr, low, high, metrics, recordTrace);
-    introsortRecursive(arr, low, p, maxDepth, depth + 1, metrics, recordTrace);
-    introsortRecursive(arr, p + 1, high, maxDepth, depth + 1, metrics, recordTrace);
-}
-
 function adaptiveSort(arr, metrics, recordTrace) {
     const n = arr.length;
 
@@ -592,9 +489,16 @@ function adaptiveSort(arr, metrics, recordTrace) {
         return;
     }
 
-    const profile = profileInput(arr);
-
-    if (profile.isFullySorted) {
+    // Step 1: Check if already sorted
+    let isSorted = true;
+    for (let i = 0; i < n - 1; ++i) {
+        metrics.comparisons++;
+        if (arr[i] > arr[i + 1]) {
+            isSorted = false;
+            break;
+        }
+    }
+    if (isSorted) {
         metrics.adaptiveStrategy = "Early Exit Verification";
         metrics.adaptiveReason = "Array is already monotonically non-decreasing. Verified in O(n) scan with 0 swaps.";
         metrics.algorithm = "Adaptive (picked: Early Exit)";
@@ -602,7 +506,7 @@ function adaptiveSort(arr, metrics, recordTrace) {
             metrics.trace.push({
                 type: OP_INFO, index1: 0, index2: n - 1, value: 0, line: 4,
                 message: "Corpus is already sorted! Single O(n) verification pass complete with 0 swaps.",
-                snapshot: cloneArr(arr), meta: JSON.stringify({ profile, picked: 'Early Exit' })
+                snapshot: cloneArr(arr), meta: ""
             });
             for (let k = 0; k < n; ++k) {
                 metrics.trace.push({
@@ -612,7 +516,19 @@ function adaptiveSort(arr, metrics, recordTrace) {
                 });
             }
         }
-    } else if (profile.isFullyReversed) {
+        return;
+    }
+
+    // Step 2: Check if reverse sorted
+    let isReverse = true;
+    for (let i = 0; i < n - 1; ++i) {
+        metrics.comparisons++;
+        if (arr[i] < arr[i + 1]) {
+            isReverse = false;
+            break;
+        }
+    }
+    if (isReverse) {
         metrics.adaptiveStrategy = "In-Place Symmetric Reversal";
         metrics.adaptiveReason = "Monotone descending sequence detected. Reversed in-place in floor(n/2) swaps with 0 comparisons.";
         metrics.algorithm = "Adaptive (picked: In-Place Reversal)";
@@ -621,72 +537,56 @@ function adaptiveSort(arr, metrics, recordTrace) {
             metrics.trace.push({
                 type: OP_INFO, index1: 0, index2: n - 1, value: 0, line: 6,
                 message: "Monotone descending sequence detected. Initiating in-place symmetric reversal in floor(n/2) swaps.",
-                snapshot: cloneArr(arr), meta: JSON.stringify({ profile, picked: 'Reversal' })
+                snapshot: cloneArr(arr), meta: ""
             });
         }
-        reverseArrayInPlace(arr, metrics, recordTrace);
+        let l = 0, r = n - 1;
+        while (l < r) {
+            doSwapArr(arr, l, r, 8, `Reversing: Swapping arr[${l}] with arr[${r}].`, metrics, recordTrace);
+            l++;
+            r--;
+        }
         if (recordTrace) {
             for (let k = 0; k < n; ++k) {
                 metrics.trace.push({
-                    type: OP_MARK_SORTED, index1: k, index2: -1, value: arr[k], line: 6,
+                    type: OP_MARK_SORTED, index1: k, index2: -1, value: arr[k], line: 9,
                     message: "Reversal complete. Array sorted in linear time.",
                     snapshot: cloneArr(arr), meta: ""
                 });
             }
         }
-    } else if (n < 16) {
+        return;
+    }
+
+    // Step 3: Small arrays use insertion sort, general arrays use quick sort
+    if (n < 16) {
         metrics.adaptiveStrategy = "Direct Insertion Sort";
-        metrics.adaptiveReason = "Subproblem size N < 16. Insertion sort eliminates call stack overhead and branch misses.";
+        metrics.adaptiveReason = "Subproblem size N < 16. Insertion sort eliminates call stack overhead.";
         metrics.algorithm = "Adaptive (picked: Insertion Sort)";
         if (recordTrace) {
             metrics.trace.push({
-                type: OP_INFO, index1: 0, index2: n - 1, value: n, line: 8,
+                type: OP_INFO, index1: 0, index2: n - 1, value: n, line: 12,
                 message: "Small array (N < 16). Selected Insertion Sort to eliminate function call overhead.",
-                snapshot: cloneArr(arr), meta: JSON.stringify({ profile, picked: 'Insertion Sort' })
-            });
-        }
-        // Save algorithm name before calling insertionSort
-        const savedName = metrics.algorithm;
-        insertionSort(arr, metrics, recordTrace);
-        metrics.algorithm = savedName; // Prevent overwrite
-    } else if (profile.sortedRuns <= 4 || profile.sampleInversions <= 3) {
-        metrics.adaptiveStrategy = "Adaptive Run Insertion";
-        metrics.adaptiveReason = `Presortedness detected (${profile.sortedRuns} runs). Insertion Sort executes in near-linear O(n) time.`;
-        metrics.algorithm = "Adaptive (picked: Run Insertion)";
-        if (recordTrace) {
-            metrics.trace.push({
-                type: OP_INFO, index1: 0, index2: n - 1, value: profile.sortedRuns, line: 10,
-                message: `Presortedness detected (${profile.sortedRuns} runs). Dispatched Adaptive Run Insertion.`,
-                snapshot: cloneArr(arr), meta: JSON.stringify({ profile, picked: 'Run Insertion' })
+                snapshot: cloneArr(arr), meta: ""
             });
         }
         const savedName = metrics.algorithm;
         insertionSort(arr, metrics, recordTrace);
-        metrics.algorithm = savedName; // Prevent overwrite
+        metrics.algorithm = savedName;
     } else {
-        const maxDepth = 2 * Math.floor(Math.log2(n));
-        metrics.adaptiveStrategy = `Introsort Hybrid (QuickSort + HeapSort cutoff at depth ${maxDepth} + Insertion < 16)`;
-        metrics.adaptiveReason = "Random or large dataset. Introsort combines QuickSort's optimal cache performance with HeapSort's O(n log n) safety.";
-        metrics.algorithm = "Adaptive (picked: Introsort)";
+        metrics.adaptiveStrategy = "Quick Sort";
+        metrics.adaptiveReason = "Unsorted general sequence. Applying standard Quick Sort.";
+        metrics.algorithm = "Adaptive (picked: Quick Sort)";
         if (recordTrace) {
             metrics.trace.push({
-                type: OP_INFO, index1: 0, index2: n - 1, value: maxDepth, line: 13,
-                message: `Dispatched Introsort: Median-of-3 QuickSort with HeapSort depth cutoff at ${maxDepth} and Insertion cutoff < 16.`,
-                snapshot: cloneArr(arr), meta: JSON.stringify({ profile, picked: 'Introsort', maxDepth })
+                type: OP_INFO, index1: 0, index2: n - 1, value: n, line: 14,
+                message: "General array. Selected Quick Sort.",
+                snapshot: cloneArr(arr), meta: ""
             });
         }
-        introsortRecursive(arr, 0, n - 1, maxDepth, 1, metrics, recordTrace);
-        metrics.auxiliaryMemoryBytes = metrics.maxRecursionDepth * 32;
-
-        if (recordTrace) {
-            for (let k = 0; k < n; ++k) {
-                metrics.trace.push({
-                    type: OP_MARK_SORTED, index1: k, index2: -1, value: arr[k], line: 14,
-                    message: "Introsort completed successfully.",
-                    snapshot: cloneArr(arr), meta: ""
-                });
-            }
-        }
+        const savedName = metrics.algorithm;
+        quickSort(arr, metrics, recordTrace);
+        metrics.algorithm = savedName;
     }
 }
 

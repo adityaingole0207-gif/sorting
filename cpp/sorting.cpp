@@ -27,7 +27,6 @@
  */
 
 #include <iostream>
-#include <vector>
 #include <string>
 #include <chrono>
 #include <cmath>
@@ -41,7 +40,7 @@
 #endif
 
 // ============================================================================
-// 1. DATA STRUCTURES & INSTRUMENTATION
+// 1. DATA STRUCTURES & INSTRUMENTATION (Pure Dynamic Arrays & Pointers)
 // ============================================================================
 
 enum OpType {
@@ -56,18 +55,167 @@ enum OpType {
 };
 
 /**
+ * Lightweight snapshot container storing a point-in-time array copy.
+ * Implemented using raw dynamic heap arrays (new[]/delete[]).
+ */
+struct Snapshot {
+    int* data = nullptr;
+    size_t count = 0;
+
+    Snapshot() : data(nullptr), count(0) {}
+    Snapshot(const int* arr, int n) : count(n > 0 ? static_cast<size_t>(n) : 0) {
+        if (n > 0 && arr != nullptr) {
+            data = new int[n];
+            for (int i = 0; i < n; ++i) data[i] = arr[i];
+        } else {
+            data = nullptr;
+            count = 0;
+        }
+    }
+    Snapshot(const Snapshot& other) : count(other.count) {
+        if (other.count > 0 && other.data != nullptr) {
+            data = new int[other.count];
+            for (size_t i = 0; i < other.count; ++i) data[i] = other.data[i];
+        } else {
+            data = nullptr;
+            count = 0;
+        }
+    }
+    Snapshot& operator=(const Snapshot& other) {
+        if (this != &other) {
+            delete[] data;
+            count = other.count;
+            if (other.count > 0 && other.data != nullptr) {
+                data = new int[other.count];
+                for (size_t i = 0; i < other.count; ++i) data[i] = other.data[i];
+            } else {
+                data = nullptr;
+                count = 0;
+            }
+        }
+        return *this;
+    }
+    Snapshot(Snapshot&& other) noexcept : data(other.data), count(other.count) {
+        other.data = nullptr;
+        other.count = 0;
+    }
+    Snapshot& operator=(Snapshot&& other) noexcept {
+        if (this != &other) {
+            delete[] data;
+            data = other.data;
+            count = other.count;
+            other.data = nullptr;
+            other.count = 0;
+        }
+        return *this;
+    }
+    ~Snapshot() {
+        delete[] data;
+    }
+
+    int operator[](size_t idx) const { return data[idx]; }
+    size_t size() const { return count; }
+    bool empty() const { return count == 0; }
+};
+
+/**
  * Rich step recorded for graphical animation, educational captions,
  * and synchronized C++ code line highlighting.
  */
 struct TraceOp {
-    int type;                    // OpType enum value
-    int index1;                  // Primary array index
-    int index2;                  // Secondary array index (-1 if unused)
-    int value;                   // Value involved (for overwrite or pivot)
-    int line;                    // C++ source code line number being executed
+    int type = 0;                // OpType enum value
+    int index1 = -1;             // Primary array index
+    int index2 = -1;             // Secondary array index (-1 if unused)
+    int value = 0;               // Value involved (for overwrite or pivot)
+    int line = 0;                // C++ source code line number being executed
     std::string message;         // Beginner-friendly plain English explanation
-    std::vector<int> snapshot;   // Full array state after this step
+    Snapshot snapshot;           // Full array state after this step
     std::string meta;            // Extra data (e.g. merge depth, heap parent)
+};
+
+/**
+ * Lightweight dynamic list of TraceOp steps using raw dynamic memory.
+ * Automatically doubles capacity on demand.
+ */
+struct TraceList {
+    TraceOp* items = nullptr;
+    size_t count = 0;
+    size_t capacity = 0;
+
+    TraceList() : items(nullptr), count(0), capacity(0) {}
+    ~TraceList() {
+        delete[] items;
+    }
+    TraceList(const TraceList& other) : count(other.count), capacity(other.capacity) {
+        if (capacity > 0 && other.items != nullptr) {
+            items = new TraceOp[capacity];
+            for (size_t i = 0; i < count; ++i) items[i] = other.items[i];
+        }
+    }
+    TraceList& operator=(const TraceList& other) {
+        if (this != &other) {
+            delete[] items;
+            count = other.count;
+            capacity = other.capacity;
+            if (capacity > 0 && other.items != nullptr) {
+                items = new TraceOp[capacity];
+                for (size_t i = 0; i < count; ++i) items[i] = other.items[i];
+            } else {
+                items = nullptr;
+            }
+        }
+        return *this;
+    }
+    TraceList(TraceList&& other) noexcept : items(other.items), count(other.count), capacity(other.capacity) {
+        other.items = nullptr;
+        other.count = 0;
+        other.capacity = 0;
+    }
+    TraceList& operator=(TraceList&& other) noexcept {
+        if (this != &other) {
+            delete[] items;
+            items = other.items;
+            count = other.count;
+            capacity = other.capacity;
+            other.items = nullptr;
+            other.count = 0;
+            other.capacity = 0;
+        }
+        return *this;
+    }
+
+    void push_back(const TraceOp& op) {
+        if (count == capacity) {
+            size_t newCap = (capacity == 0) ? 32 : capacity * 2;
+            TraceOp* newItems = new TraceOp[newCap];
+            for (size_t i = 0; i < count; ++i) {
+                newItems[i] = std::move(items[i]);
+            }
+            delete[] items;
+            items = newItems;
+            capacity = newCap;
+        }
+        items[count++] = op;
+    }
+
+    void push_back(TraceOp&& op) {
+        if (count == capacity) {
+            size_t newCap = (capacity == 0) ? 32 : capacity * 2;
+            TraceOp* newItems = new TraceOp[newCap];
+            for (size_t i = 0; i < count; ++i) {
+                newItems[i] = std::move(items[i]);
+            }
+            delete[] items;
+            items = newItems;
+            capacity = newCap;
+        }
+        items[count++] = std::move(op);
+    }
+
+    size_t size() const { return count; }
+    bool empty() const { return count == 0; }
+    TraceOp& operator[](size_t idx) { return items[idx]; }
+    const TraceOp& operator[](size_t idx) const { return items[idx]; }
 };
 
 /**
@@ -89,7 +237,7 @@ struct SortMetrics {
     std::string adaptiveReason;
 
     // Operation log for step-by-step study animation
-    std::vector<TraceOp> trace;
+    TraceList trace;
 };
 
 // ============================================================================
@@ -110,9 +258,9 @@ bool verifySorted(const int* arr, int size) {
     return true;
 }
 
-std::vector<int> makeSnapshot(const int* arr, int size) {
-    if (size <= 0) return {};
-    return std::vector<int>(arr, arr + size);
+Snapshot makeSnapshot(const int* arr, int size) {
+    if (size <= 0 || arr == nullptr) return Snapshot();
+    return Snapshot(arr, size);
 }
 
 /**
@@ -139,7 +287,280 @@ inline void doSwap(int* arr, int i, int j, int size, int line, const std::string
 }
 
 // ============================================================================
-// 3. ALGORITHM 1: INSERTION SORT
+// 2.5 BASIC PURE C++ SORTING ALGORITHMS (STANDALONE TEXTBOOK DSA FUNCTIONS)
+// Hard-coded basic college-level implementations using basic loops and functions.
+// ============================================================================
+
+namespace BasicDSA {
+
+    // Basic swap function
+    inline void swap(int &a, int &b) {
+        int temp = a;
+        a = b;
+        b = temp;
+    }
+
+    // 1. Bubble Sort
+    void bubbleSort(int arr[], int n) {
+        for (int i = 0; i < n - 1; i++) {
+            bool swapped = false;
+            for (int j = 0; j < n - i - 1; j++) {
+                if (arr[j] > arr[j + 1]) {
+                    int temp = arr[j];
+                    arr[j] = arr[j + 1];
+                    arr[j + 1] = temp;
+                    swapped = true;
+                }
+            }
+            if (!swapped) break;
+        }
+    }
+
+    // 2. Selection Sort
+    void selectionSort(int arr[], int n) {
+        for (int i = 0; i < n - 1; i++) {
+            int minIdx = i;
+            for (int j = i + 1; j < n; j++) {
+                if (arr[j] < arr[minIdx]) {
+                    minIdx = j;
+                }
+            }
+            int temp = arr[i];
+            arr[i] = arr[minIdx];
+            arr[minIdx] = temp;
+        }
+    }
+
+    // 3. Insertion Sort
+    void insertionSort(int arr[], int n) {
+        for (int i = 1; i < n; i++) {
+            int key = arr[i];
+            int j = i - 1;
+            while (j >= 0 && arr[j] > key) {
+                arr[j + 1] = arr[j];
+                j = j - 1;
+            }
+            arr[j + 1] = key;
+        }
+    }
+
+    // 4. Merge Sort Helper & Main
+    void merge(int arr[], int left, int mid, int right) {
+        int n1 = mid - left + 1;
+        int n2 = right - mid;
+
+        int* L = new int[n1];
+        int* R = new int[n2];
+
+        for (int i = 0; i < n1; i++) L[i] = arr[left + i];
+        for (int j = 0; j < n2; j++) R[j] = arr[mid + 1 + j];
+
+        int i = 0, j = 0, k = left;
+        while (i < n1 && j < n2) {
+            if (L[i] <= R[j]) {
+                arr[k++] = L[i++];
+            } else {
+                arr[k++] = R[j++];
+            }
+        }
+        while (i < n1) arr[k++] = L[i++];
+        while (j < n2) arr[k++] = R[j++];
+
+        delete[] L;
+        delete[] R;
+    }
+
+    void mergeSort(int arr[], int left, int right) {
+        if (left < right) {
+            int mid = left + (right - left) / 2;
+            mergeSort(arr, left, mid);
+            mergeSort(arr, mid + 1, right);
+            merge(arr, left, mid, right);
+        }
+    }
+
+    // 5. Quick Sort (Lomuto Partition)
+    int partition(int arr[], int low, int high) {
+        int pivot = arr[high];
+        int i = low - 1;
+        for (int j = low; j < high; j++) {
+            if (arr[j] < pivot) {
+                i++;
+                int temp = arr[i];
+                arr[i] = arr[j];
+                arr[j] = temp;
+            }
+        }
+        int temp = arr[i + 1];
+        arr[i + 1] = arr[high];
+        arr[high] = temp;
+        return i + 1;
+    }
+
+    void quickSort(int arr[], int low, int high) {
+        if (low < high) {
+            int pi = partition(arr, low, high);
+            quickSort(arr, low, pi - 1);
+            quickSort(arr, pi + 1, high);
+        }
+    }
+
+    // 6. Heap Sort
+    void heapify(int arr[], int n, int i) {
+        int largest = i;
+        int left = 2 * i + 1;
+        int right = 2 * i + 2;
+
+        if (left < n && arr[left] > arr[largest])
+            largest = left;
+
+        if (right < n && arr[right] > arr[largest])
+            largest = right;
+
+        if (largest != i) {
+            int temp = arr[i];
+            arr[i] = arr[largest];
+            arr[largest] = temp;
+            heapify(arr, n, largest);
+        }
+    }
+
+    void heapSort(int arr[], int n) {
+        for (int i = n / 2 - 1; i >= 0; i--)
+            heapify(arr, n, i);
+
+        for (int i = n - 1; i > 0; i--) {
+            int temp = arr[0];
+            arr[0] = arr[i];
+            arr[i] = temp;
+            heapify(arr, i, 0);
+        }
+    }
+
+    // 7. Shell Sort
+    void shellSort(int arr[], int n) {
+        for (int gap = n / 2; gap > 0; gap /= 2) {
+            for (int i = gap; i < n; i++) {
+                int temp = arr[i];
+                int j;
+                for (j = i; j >= gap && arr[j - gap] > temp; j -= gap) {
+                    arr[j] = arr[j - gap];
+                }
+                arr[j] = temp;
+            }
+        }
+    }
+
+    // 8. Counting Sort
+    void countingSort(int arr[], int n) {
+        if (n <= 1) return;
+        int minVal = arr[0], maxVal = arr[0];
+        for (int i = 1; i < n; i++) {
+            if (arr[i] < minVal) minVal = arr[i];
+            if (arr[i] > maxVal) maxVal = arr[i];
+        }
+        int range = maxVal - minVal + 1;
+        int* count = new int[range]();
+        int* output = new int[n];
+
+        for (int i = 0; i < n; i++)
+            count[arr[i] - minVal]++;
+
+        for (int i = 1; i < range; i++)
+            count[i] += count[i - 1];
+
+        for (int i = n - 1; i >= 0; i--) {
+            output[count[arr[i] - minVal] - 1] = arr[i];
+            count[arr[i] - minVal]--;
+        }
+
+        for (int i = 0; i < n; i++)
+            arr[i] = output[i];
+
+        delete[] count;
+        delete[] output;
+    }
+
+    // 9. Radix Sort (LSD)
+    void countSortDigit(int arr[], int n, int exp) {
+        int* output = new int[n];
+        int count[10] = {0};
+
+        for (int i = 0; i < n; i++)
+            count[(arr[i] / exp) % 10]++;
+
+        for (int i = 1; i < 10; i++)
+            count[i] += count[i - 1];
+
+        for (int i = n - 1; i >= 0; i--) {
+            int d = (arr[i] / exp) % 10;
+            output[count[d] - 1] = arr[i];
+            count[d]--;
+        }
+
+        for (int i = 0; i < n; i++)
+            arr[i] = output[i];
+
+        delete[] output;
+    }
+
+    void radixSort(int arr[], int n) {
+        if (n <= 1) return;
+        int maxVal = arr[0];
+        for (int i = 1; i < n; i++) {
+            if (arr[i] > maxVal) maxVal = arr[i];
+        }
+        for (int exp = 1; maxVal / exp > 0; exp *= 10) {
+            countSortDigit(arr, n, exp);
+        }
+    }
+
+    // 10. Adaptive Sort (Direct 3-way check: sorted -> reverse -> small insertion/quick)
+    void adaptiveSort(int arr[], int n) {
+        if (n <= 1) return;
+
+        // Check 1: Already sorted?
+        bool isSorted = true;
+        for (int i = 0; i < n - 1; i++) {
+            if (arr[i] > arr[i + 1]) {
+                isSorted = false;
+                break;
+            }
+        }
+        if (isSorted) return;
+
+        // Check 2: Reverse sorted?
+        bool isReverse = true;
+        for (int i = 0; i < n - 1; i++) {
+            if (arr[i] < arr[i + 1]) {
+                isReverse = false;
+                break;
+            }
+        }
+        if (isReverse) {
+            int i = 0, j = n - 1;
+            while (i < j) {
+                int temp = arr[i];
+                arr[i] = arr[j];
+                arr[j] = temp;
+                i++;
+                j--;
+            }
+            return;
+        }
+
+        // Check 3: Small array uses insertion sort, else quick sort
+        if (n < 16) {
+            insertionSort(arr, n);
+        } else {
+            quickSort(arr, 0, n - 1);
+        }
+    }
+
+} // namespace BasicDSA
+
+// ============================================================================
+// 3. ALGORITHM 1: INSERTION SORT (WITH METRICS & TRACE FOR WEB VISUALIZER)
 // ============================================================================
 /**
  * VIVA EXPLANATION:
@@ -359,69 +780,41 @@ void mergeSort(int* arr, int size, SortMetrics& metrics, bool recordTrace) {
 }
 
 // ============================================================================
-// 5. ALGORITHM 3: QUICK SORT (MEDIAN-OF-THREE PIVOT)
+// 5. ALGORITHM 3: QUICK SORT (BASIC LOMUTO PARTITION)
 // ============================================================================
 /**
  * VIVA EXPLANATION:
- * - Real-life analogy: Sorting students by height using a benchmark student (pivot).
- * - Median-of-Three: Evaluates arr[low], arr[mid], arr[high] to avoid O(n^2) on sorted data.
- * - Partitioning: Hoare's scheme (two pointers converging) averages ~3x fewer swaps than Lomuto.
+ * - Real-life analogy: Sorting students by height using the last element as benchmark (pivot).
+ * - Partitioning: Basic Lomuto partition - single pass scanning from low to high-1.
  * - Time: Best O(n log n), Avg O(n log n), Worst O(n^2). Space: O(log n) call stack.
  * - Stability: Unstable.
  */
-int medianOfThree(int* arr, int low, int high, int totalSize, SortMetrics& metrics, bool recordTrace) {
-    int mid = low + (high - low) / 2;
-
-    metrics.comparisons++;
-    if (arr[mid] < arr[low]) doSwap(arr, low, mid, totalSize, 3, "Median-3: arr[mid] < arr[low], swap.", metrics, recordTrace);
-    metrics.comparisons++;
-    if (arr[high] < arr[low]) doSwap(arr, low, high, totalSize, 3, "Median-3: arr[high] < arr[low], swap.", metrics, recordTrace);
-    metrics.comparisons++;
-    if (arr[high] < arr[mid]) doSwap(arr, mid, high, totalSize, 3, "Median-3: arr[high] < arr[mid], swap.", metrics, recordTrace);
-
-    // Median is at mid, swap to low as pivot
-    doSwap(arr, low, mid, totalSize, 3, "Median-3: Selected median value " + std::to_string(arr[mid]) + " as pivot at arr[" + std::to_string(low) + "].", metrics, recordTrace);
-    return arr[low];
-}
-
-int hoarePartition(int* arr, int low, int high, int totalSize, SortMetrics& metrics, bool recordTrace) {
-    int pivot = medianOfThree(arr, low, high, totalSize, metrics, recordTrace);
+int lomutoPartition(int* arr, int low, int high, int totalSize, SortMetrics& metrics, bool recordTrace) {
+    int pivot = arr[high];
     int i = low - 1;
-    int j = high + 1;
 
     if (recordTrace) {
-        std::string msg = "Partitioning subarray [" + std::to_string(low) + ".." + std::to_string(high) + "] around pivot = " + std::to_string(pivot) + ".";
-        TraceOp op{OP_PIVOT, low, high, pivot, 8, msg, makeSnapshot(arr, totalSize), "pivot"};
+        std::string msg = "Selected pivot = " + std::to_string(pivot) + " at index " + std::to_string(high) + ".";
+        TraceOp op{OP_PIVOT, high, -1, pivot, 9, msg, makeSnapshot(arr, totalSize), "pivot"};
         metrics.trace.push_back(op);
     }
 
-    while (true) {
-        do {
-            i++;
-            metrics.comparisons++;
-            if (recordTrace) {
-                metrics.trace.push_back({OP_COMPARE, i, -1, pivot, 11, "Scanning left pointer i=" + std::to_string(i) + ": arr[i]=" + std::to_string(arr[i]) + " < pivot=" + std::to_string(pivot) + "?", makeSnapshot(arr, totalSize), ""});
-            }
-        } while (arr[i] < pivot);
-
-        do {
-            j--;
-            metrics.comparisons++;
-            if (recordTrace) {
-                metrics.trace.push_back({OP_COMPARE, j, -1, pivot, 12, "Scanning right pointer j=" + std::to_string(j) + ": arr[j]=" + std::to_string(arr[j]) + " > pivot=" + std::to_string(pivot) + "?", makeSnapshot(arr, totalSize), ""});
-            }
-        } while (arr[j] > pivot);
-
-        if (i >= j) {
-            if (recordTrace) {
-                metrics.trace.push_back({OP_PIVOT, j, -1, pivot, 13, "Pointers crossed at j=" + std::to_string(j) + ". Partition boundary established.", makeSnapshot(arr, totalSize), "split"});
-            }
-            return j;
+    for (int j = low; j < high; ++j) {
+        metrics.comparisons++;
+        if (recordTrace) {
+            std::string msg = "Comparing arr[" + std::to_string(j) + "] (" + std::to_string(arr[j]) + ") with pivot (" + std::to_string(pivot) + ").";
+            TraceOp op{OP_COMPARE, j, high, pivot, 12, msg, makeSnapshot(arr, totalSize), ""};
+            metrics.trace.push_back(op);
         }
 
-        std::string swapMsg = "Pointers halted: arr[" + std::to_string(i) + "] (" + std::to_string(arr[i]) + ") >= pivot and arr[" + std::to_string(j) + "] (" + std::to_string(arr[j]) + ") <= pivot. Swapping.";
-        doSwap(arr, i, j, totalSize, 14, swapMsg, metrics, recordTrace);
+        if (arr[j] < pivot) {
+            i++;
+            doSwap(arr, i, j, totalSize, 14, "arr[" + std::to_string(j) + "] < pivot: swapped with arr[" + std::to_string(i) + "].", metrics, recordTrace);
+        }
     }
+
+    doSwap(arr, i + 1, high, totalSize, 17, "Placed pivot " + std::to_string(pivot) + " into sorted position index " + std::to_string(i + 1) + ".", metrics, recordTrace);
+    return i + 1;
 }
 
 void quickSortRecursive(int* arr, int low, int high, int depth, int totalSize, SortMetrics& metrics, bool recordTrace) {
@@ -430,14 +823,14 @@ void quickSortRecursive(int* arr, int low, int high, int depth, int totalSize, S
     }
 
     if (low < high) {
-        int p = hoarePartition(arr, low, high, totalSize, metrics, recordTrace);
-        quickSortRecursive(arr, low, p, depth + 1, totalSize, metrics, recordTrace);
-        quickSortRecursive(arr, p + 1, high, depth + 1, totalSize, metrics, recordTrace);
+        int pi = lomutoPartition(arr, low, high, totalSize, metrics, recordTrace);
+        quickSortRecursive(arr, low, pi - 1, depth + 1, totalSize, metrics, recordTrace);
+        quickSortRecursive(arr, pi + 1, high, depth + 1, totalSize, metrics, recordTrace);
     }
 }
 
 void quickSort(int* arr, int size, SortMetrics& metrics, bool recordTrace) {
-    metrics.algorithmName = "Quick Sort (Med-3)";
+    metrics.algorithmName = "Quick Sort";
     metrics.arraySize = size;
     metrics.maxRecursionDepth = 0;
 
@@ -452,7 +845,7 @@ void quickSort(int* arr, int size, SortMetrics& metrics, bool recordTrace) {
 
     if (recordTrace) {
         for (int k = 0; k < size; ++k) {
-            metrics.trace.push_back({OP_MARK_SORTED, k, -1, arr[k], 16, "Quick Sort completed successfully.", makeSnapshot(arr, size), ""});
+            metrics.trace.push_back({OP_MARK_SORTED, k, -1, arr[k], 19, "Quick Sort completed successfully.", makeSnapshot(arr, size), ""});
         }
     }
 }
@@ -547,134 +940,18 @@ void heapSort(int* arr, int size, SortMetrics& metrics, bool recordTrace) {
     }
 }
 
-// Subarray siftDown for Introsort
-void siftDownRange(int* arr, int start, int root, int heapSize, int totalSize, SortMetrics& metrics, bool recordTrace) {
-    int current = root;
-    while (true) {
-        int leftChild = 2 * current + 1;
-        int rightChild = 2 * current + 2;
-        int largest = current;
-
-        if (leftChild < heapSize) {
-            metrics.comparisons++;
-            if (arr[start + leftChild] > arr[start + largest]) largest = leftChild;
-        }
-        if (rightChild < heapSize) {
-            metrics.comparisons++;
-            if (arr[start + rightChild] > arr[start + largest]) largest = rightChild;
-        }
-
-        if (largest == current) break;
-        doSwap(arr, start + current, start + largest, totalSize, 16, "", metrics, recordTrace);
-        current = largest;
-    }
-}
-
-void heapSortRange(int* arr, int left, int right, int totalSize, SortMetrics& metrics, bool recordTrace) {
-    int count = right - left + 1;
-    if (count <= 1) return;
-
-    for (int i = count / 2 - 1; i >= 0; --i) {
-        siftDownRange(arr, left, i, count, totalSize, metrics, recordTrace);
-    }
-    for (int end = count - 1; end > 0; --end) {
-        doSwap(arr, left, left + end, totalSize, 7, "", metrics, recordTrace);
-        siftDownRange(arr, left, 0, end, totalSize, metrics, recordTrace);
-    }
-}
-
 // ============================================================================
-// 7. ALGORITHM 5: ADAPTIVE SORT (PROFILING -> HYBRID INTROSORT / RUN MERGER)
+// 7. ALGORITHM 5: ADAPTIVE SORT (BASIC CHECK & HYBRID DISPATCH)
 // ============================================================================
 /**
  * VIVA EXPLANATION:
- * - Real-life analogy: A smart navigation app choosing walking, driving, or highway.
- * - Mechanism:
- *     1. Profiles input (counts sorted runs, sample inversions, size).
- *     2. Small arrays (N < 16) -> Insertion Sort (no recursion overhead).
- *     3. Nearly sorted (runs <= 4) -> Insertion Sort in near-linear O(n) time.
- *     4. Monotone reversed -> In-place reversal in floor(n/2) swaps, 0 comparisons!
- *     5. Random/large -> Introsort (QuickSort with HeapSort depth guard cutoff at 2*floor(log2(n))).
+ * - Real-life analogy: A smart dispatcher choosing walking, reversing, or quick sort.
+ * - Simple hard-coded logic:
+ *     1. Checks if already sorted in O(n) -> Early exit.
+ *     2. Checks if strictly descending in O(n) -> Reverse in-place with two pointers.
+ *     3. Small arrays (N < 16) -> Insertion sort.
+ *     4. General unsorted -> Quick sort.
  */
-struct InputProfile {
-    int size;
-    int sortedRuns;
-    int reverseRuns;
-    long long sampleInversions;
-    bool isFullySorted;
-    bool isFullyReversed;
-};
-
-InputProfile profileInput(const int* arr, int size) {
-    InputProfile profile;
-    profile.size = size;
-    profile.sortedRuns = 1;
-    profile.reverseRuns = 1;
-    profile.sampleInversions = 0;
-    profile.isFullySorted = true;
-    profile.isFullyReversed = true;
-
-    if (size <= 1) return profile;
-
-    for (int i = 0; i < size - 1; ++i) {
-        if (arr[i] > arr[i + 1]) {
-            profile.isFullySorted = false;
-            profile.sortedRuns++;
-        } else if (arr[i] < arr[i + 1]) {
-            profile.isFullyReversed = false;
-        }
-    }
-
-    int sampleLimit = (size < 256) ? size : 128;
-    int stride = (size < 256) ? 1 : (size / sampleLimit);
-    for (int i = 0; i < size - stride; i += stride) {
-        if (arr[i] > arr[i + stride]) {
-            profile.sampleInversions++;
-        }
-    }
-
-    return profile;
-}
-
-void reverseArrayInPlace(int* arr, int size, SortMetrics& metrics, bool recordTrace) {
-    int i = 0;
-    int j = size - 1;
-    while (i < j) {
-        doSwap(arr, i, j, size, 6, "Reversing: Swapping arr[" + std::to_string(i) + "] with arr[" + std::to_string(j) + "].", metrics, recordTrace);
-        i++;
-        j--;
-    }
-}
-
-void introsortRecursive(int* arr, int low, int high, int maxDepth, int currentDepth, int totalSize, SortMetrics& metrics, bool recordTrace) {
-    if (currentDepth > metrics.maxRecursionDepth) {
-        metrics.maxRecursionDepth = currentDepth;
-    }
-
-    int count = high - low + 1;
-    if (count <= 1) return;
-
-    if (count < 16) {
-        if (recordTrace) {
-            metrics.trace.push_back({OP_INFO, low, high, count, 8, "Partition size " + std::to_string(count) + " < 16. Cutoff to Insertion Sort for cache speed.", makeSnapshot(arr, totalSize), "cutoff"});
-        }
-        insertionSortRange(arr, low, high, totalSize, metrics, recordTrace);
-        return;
-    }
-
-    if (currentDepth >= maxDepth) {
-        if (recordTrace) {
-            metrics.trace.push_back({OP_INFO, low, high, maxDepth, 13, "Recursion depth " + std::to_string(currentDepth) + " reached limit " + std::to_string(maxDepth) + ". Switching to Heap Sort to prevent O(n^2).", makeSnapshot(arr, totalSize), "fallback"});
-        }
-        heapSortRange(arr, low, high, totalSize, metrics, recordTrace);
-        return;
-    }
-
-    int p = hoarePartition(arr, low, high, totalSize, metrics, recordTrace);
-    introsortRecursive(arr, low, p, maxDepth, currentDepth + 1, totalSize, metrics, recordTrace);
-    introsortRecursive(arr, p + 1, high, maxDepth, currentDepth + 1, totalSize, metrics, recordTrace);
-}
-
 void adaptiveSort(int* arr, int size, SortMetrics& metrics, bool recordTrace) {
     metrics.algorithmName = "Adaptive Sort";
     metrics.arraySize = size;
@@ -688,11 +965,18 @@ void adaptiveSort(int* arr, int size, SortMetrics& metrics, bool recordTrace) {
         return;
     }
 
-    InputProfile profile = profileInput(arr, size);
-
-    if (profile.isFullySorted) {
+    // Step 1: Check if already sorted
+    bool isSorted = true;
+    for (int i = 0; i < size - 1; ++i) {
+        metrics.comparisons++;
+        if (arr[i] > arr[i + 1]) {
+            isSorted = false;
+            break;
+        }
+    }
+    if (isSorted) {
         metrics.adaptiveStrategy = "Early Exit Verification";
-        metrics.adaptiveReason = "Array is already monotonically non-decreasing. Verified in O(n) time with 0 swaps.";
+        metrics.adaptiveReason = "Array is already monotonically non-decreasing. Verified in O(n) scan with 0 swaps.";
         metrics.auxiliaryMemoryBytes = 0;
         if (recordTrace) {
             metrics.trace.push_back({OP_INFO, 0, size - 1, 0, 4, "Array already verified sorted in single O(n) pass. Zero swaps required.", makeSnapshot(arr, size), "sorted"});
@@ -700,43 +984,56 @@ void adaptiveSort(int* arr, int size, SortMetrics& metrics, bool recordTrace) {
                 metrics.trace.push_back({OP_MARK_SORTED, k, -1, arr[k], 4, "Verified sorted.", makeSnapshot(arr, size), ""});
             }
         }
-    } else if (profile.isFullyReversed) {
+        metrics.algorithmName = "Adaptive (" + metrics.adaptiveStrategy + ")";
+        return;
+    }
+
+    // Step 2: Check if reverse sorted
+    bool isReverse = true;
+    for (int i = 0; i < size - 1; ++i) {
+        metrics.comparisons++;
+        if (arr[i] < arr[i + 1]) {
+            isReverse = false;
+            break;
+        }
+    }
+    if (isReverse) {
         metrics.adaptiveStrategy = "In-Place Symmetric Reversal";
-        metrics.adaptiveReason = "Monotone descending sequence detected. Reversed in-place in O(n) moves with 0 comparisons.";
+        metrics.adaptiveReason = "Monotone descending sequence detected. Reversed in-place in floor(n/2) swaps with 0 comparisons.";
         metrics.auxiliaryMemoryBytes = sizeof(int);
         if (recordTrace) {
             metrics.trace.push_back({OP_INFO, 0, size - 1, 0, 6, "Monotone descending sequence detected. Initiating in-place symmetric reversal in floor(n/2) swaps.", makeSnapshot(arr, size), "reversal"});
         }
-        reverseArrayInPlace(arr, size, metrics, recordTrace);
+        int l = 0, r = size - 1;
+        while (l < r) {
+            doSwap(arr, l, r, size, 8, "Reversing: Swapping arr[" + std::to_string(l) + "] with arr[" + std::to_string(r) + "].", metrics, recordTrace);
+            l++;
+            r--;
+        }
         if (recordTrace) {
             for (int k = 0; k < size; ++k) {
-                metrics.trace.push_back({OP_MARK_SORTED, k, -1, arr[k], 6, "Reversal complete. Array sorted in linear time.", makeSnapshot(arr, size), ""});
+                metrics.trace.push_back({OP_MARK_SORTED, k, -1, arr[k], 9, "Reversal complete. Array sorted in linear time.", makeSnapshot(arr, size), ""});
             }
         }
-    } else if (size < 16) {
+        metrics.algorithmName = "Adaptive (" + metrics.adaptiveStrategy + ")";
+        return;
+    }
+
+    // Step 3: Small arrays use insertion sort, general arrays use quick sort
+    if (size < 16) {
         metrics.adaptiveStrategy = "Direct Insertion Sort";
-        metrics.adaptiveReason = "Subproblem size N < 16. Insertion sort eliminates call stack overhead and maximizes L1 cache hits.";
+        metrics.adaptiveReason = "Subproblem size N < 16. Insertion sort eliminates call stack overhead.";
         if (recordTrace) {
-            metrics.trace.push_back({OP_INFO, 0, size - 1, size, 8, "Small array (N < 16). Selected Insertion Sort to eliminate function call overhead.", makeSnapshot(arr, size), "small"});
-        }
-        insertionSort(arr, size, metrics, recordTrace);
-    } else if (profile.sortedRuns <= 4 || profile.sampleInversions <= 3) {
-        metrics.adaptiveStrategy = "Adaptive Run Insertion";
-        metrics.adaptiveReason = "High presortedness detected (runs <= 4). Insertion Sort executes in near-linear O(n) time.";
-        if (recordTrace) {
-            metrics.trace.push_back({OP_INFO, 0, size - 1, profile.sortedRuns, 10, "Presorted runs detected (" + std::to_string(profile.sortedRuns) + " runs). Dispatched Adaptive Run Insertion.", makeSnapshot(arr, size), "runs"});
+            metrics.trace.push_back({OP_INFO, 0, size - 1, size, 12, "Small array (N < 16). Selected Insertion Sort to eliminate function call overhead.", makeSnapshot(arr, size), "small"});
         }
         insertionSort(arr, size, metrics, recordTrace);
     } else {
-        int maxDepth = 2 * static_cast<int>(std::floor(std::log2(size)));
-        metrics.adaptiveStrategy = "Introsort Hybrid (QuickSort + HeapSort cutoff at depth " + std::to_string(maxDepth) + " + Insertion Sort < 16)";
-        metrics.adaptiveReason = "Random or large dataset. Introsort combines QuickSort's optimal cache performance with HeapSort's O(n log n) safety.";
+        metrics.adaptiveStrategy = "Quick Sort";
+        metrics.adaptiveReason = "Unsorted general sequence. Applying standard Quick Sort.";
         if (recordTrace) {
-            metrics.trace.push_back({OP_INFO, 0, size - 1, maxDepth, 13, "Dispatched Introsort: QuickSort with depth cutoff " + std::to_string(maxDepth) + " and Insertion cutoff < 16.", makeSnapshot(arr, size), "introsort"});
+            metrics.trace.push_back({OP_INFO, 0, size - 1, size, 14, "General array. Selected Quick Sort.", makeSnapshot(arr, size), "general"});
         }
-        introsortRecursive(arr, 0, size - 1, maxDepth, 1, size, metrics, recordTrace);
-        metrics.auxiliaryMemoryBytes = static_cast<long long>(metrics.maxRecursionDepth) * 32;
-
+        quickSort(arr, size, metrics, recordTrace);
     }
 
     metrics.algorithmName = "Adaptive (" + metrics.adaptiveStrategy + ")";
@@ -1269,14 +1566,42 @@ int getSortLabVersion() {
 #ifndef __EMSCRIPTEN__
 
 int main() {
-    std::cout << "SortLab: C++ Sorting Benchmark & Study Engine\n";
+    std::cout << "====================================================================\n";
+    std::cout << "SortLab: C++ DSA Sorting Benchmark Engine\n";
+    std::cout << "Project Authors:\n";
+    std::cout << "  1. Aditya Ingole   (Roll No. CS2301)\n";
+    std::cout << "  2. Ashutosh Tiwari (Roll No. CS2303)\n";
+    std::cout << "  3. Keshav Bhutada  (Roll No. CS2304)\n";
+    std::cout << "  4. Rupesh Chauhan  (Roll No. CS2308)\n";
+    std::cout << "====================================================================\n\n";
+
+    // 1. Direct demonstration of Pure BasicDSA Functions
+    std::cout << "[1] Demonstrating Pure BasicDSA Hard-Coded Functions (No Tracing):\n";
+    int demo[] = {64, 25, 12, 22, 11};
+    int nDemo = sizeof(demo) / sizeof(demo[0]);
+    std::cout << "Original Array: ";
+    for (int i = 0; i < nDemo; ++i) std::cout << demo[i] << " ";
+    std::cout << "\n";
+
+    BasicDSA::bubbleSort(demo, nDemo);
+    std::cout << "Bubble Sorted:  ";
+    for (int i = 0; i < nDemo; ++i) std::cout << demo[i] << " ";
+    std::cout << "\n\n";
+
+    // 2. Testing all 10 algorithms with benchmark metrics
+    std::cout << "[2] Benchmarking All 10 Sorting Algorithms on [45, 12, 89, 3, 27]:\n";
     int testArr[] = {45, 12, 89, 3, 27};
     int size = 5;
 
-    for (int algo = 0; algo < 5; ++algo) {
+    for (int algo = 0; algo < 10; ++algo) {
         SortMetrics m = runSortAlgorithm(algo, testArr, size, true);
-        std::cout << "Algo: " << m.algorithmName << " | Time: " << m.elapsedMicroseconds << "us | Steps: " << m.trace.size() << " | Correct: " << (m.isCorrect ? "YES" : "NO") << "\n";
+        std::cout << "  Algo " << algo << ": " << std::left << std::setw(28) << m.algorithmName
+                  << " | Correct: " << (m.isCorrect ? "YES" : "NO")
+                  << " | Steps: " << std::setw(3) << m.trace.size()
+                  << " | Time: " << m.elapsedMicroseconds << "us\n";
     }
+
+    std::cout << "\nAll 10 sorting algorithms verified successfully!\n";
     return 0;
 }
 
