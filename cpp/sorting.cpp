@@ -969,8 +969,8 @@ void countingSort(int* arr, int size, SortMetrics& metrics, bool recordTrace) {
     }
 
     metrics.auxiliaryMemoryBytes = (range * sizeof(int)) + (size * sizeof(int));
-    std::vector<int> count(range, 0);
-    std::vector<int> output(size);
+    int* count = new int[range]();
+    int* output = new int[size];
 
     if (recordTrace) {
         metrics.trace.push_back({OP_INFO, minVal, maxVal, range, 2, "Determined key spectrum: min = " + std::to_string(minVal) + ", max = " + std::to_string(maxVal) + ", range = " + std::to_string(range) + ". Allocating frequency buckets.", makeSnapshot(arr, size), "range"});
@@ -1013,6 +1013,9 @@ void countingSort(int* arr, int size, SortMetrics& metrics, bool recordTrace) {
             metrics.trace.push_back({OP_MARK_SORTED, k, -1, arr[k], 10, "Counting sort complete in linear O(n + k) time.", makeSnapshot(arr, size), ""});
         }
     }
+
+    delete[] count;
+    delete[] output;
 }
 
 // ============================================================================
@@ -1052,7 +1055,7 @@ void radixSortLSD(int* arr, int size, SortMetrics& metrics, bool recordTrace) {
     }
 
     // Perform counting sort for every digit position (1s, 10s, 100s, ...)
-    std::vector<int> output(size);
+    int* output = new int[size];
     int passNumber = 1;
 
     for (int exp = 1; maxVal / exp > 0; exp *= 10) {
@@ -1102,6 +1105,8 @@ void radixSortLSD(int* arr, int size, SortMetrics& metrics, bool recordTrace) {
             metrics.trace.push_back({OP_MARK_SORTED, k, -1, arr[k], 8, "Radix sort (LSD) complete across all digit powers.", makeSnapshot(arr, size), ""});
         }
     }
+
+    delete[] output;
 }
 
 // ============================================================================

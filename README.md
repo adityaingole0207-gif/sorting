@@ -96,7 +96,11 @@ Addresses the formal university assignment requirements:
 
 ### 05 // About (Academic Credentials & Architecture)
 - Course context: Data Structures & Algorithms Mini-Project.
-- Academic project team: Alex Mercer, Priya Sharma, David Chen.
+- Academic project team:
+  1. **Aditya Ingole** (Roll No. CS2301)
+  2. **Ashutosh Tiwari** (Roll No. CS2303)
+  3. **Keshav Bhutada** (Roll No. CS2304)
+  4. **Rupesh Chauhan** (Roll No. CS2308)
 - Technology Architecture: Hand-written C++17 compiled to WebAssembly via Emscripten, non-blocking pure JavaScript Web Worker fallback engine, vanilla HTML5, CSS3, modern Canvas / Chart.js.
 
 ---

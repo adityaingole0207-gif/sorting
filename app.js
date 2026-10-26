@@ -17,9 +17,10 @@
     course: "Data Structures & Algorithms (DSA)",
     courseCode: "CS-2026-DSA",
     authors: [
-      { name: "Alex Mercer", rollNo: "2026-DSA-01" },
-      { name: "Priya Sharma", rollNo: "2026-DSA-14" },
-      { name: "David Chen", rollNo: "2026-DSA-29" }
+      { name: "Aditya Ingole", rollNo: "CS2301" },
+      { name: "Ashutosh Tiwari", rollNo: "CS2303" },
+      { name: "Keshav Bhutada", rollNo: "CS2304" },
+      { name: "Rupesh Chauhan", rollNo: "CS2308" }
     ]
   };
 
@@ -905,8 +906,8 @@
         "        if (arr[i] > maxVal) maxVal = arr[i];",
         "    }",
         "    int range = maxVal - minVal + 1;",
-        "    vector<int> count(range, 0);",
-        "    vector<int> output(n);",
+        "    int* count = new int[range]();",
+        "    int* output = new int[n];",
         "    for (int i = 0; i < n; i++) count[arr[i] - minVal]++;",
         "    for (int i = 1; i < range; i++) count[i] += count[i - 1];",
         "    for (int i = n - 1; i >= 0; i--) {",
@@ -914,6 +915,8 @@
         "        count[arr[i] - minVal]--;",
         "    }",
         "    for (int i = 0; i < n; i++) arr[i] = output[i];",
+        "    delete[] count;",
+        "    delete[] output;",
         "}"
       ],
       pseudoCode: [
@@ -1009,7 +1012,7 @@
         "    }",
         "}",
         "void countSortDigit(int arr[], int n, int exp) {",
-        "    vector<int> output(n);",
+        "    int* output = new int[n];",
         "    int count[10] = {0};",
         "    for (int i = 0; i < n; i++) count[(arr[i] / exp) % 10]++;",
         "    for (int i = 1; i < 10; i++) count[i] += count[i - 1];",
@@ -1019,6 +1022,7 @@
         "        count[d]--;",
         "    }",
         "    for (int i = 0; i < n; i++) arr[i] = output[i];",
+        "    delete[] output;",
         "}"
       ],
       pseudoCode: [
