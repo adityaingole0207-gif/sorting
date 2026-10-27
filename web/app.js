@@ -25,19 +25,15 @@
   };
 
   // ==========================================================================
-  // STATIC THEORY COMPARISON DATA (ALL 10 DSA SORTING ALGORITHMS)
+  // STATIC THEORY COMPARISON DATA (6 CORE DSA SORTING ALGORITHMS)
   // ==========================================================================
   const THEORY_DATA = [
     { id: 0, name: "Insertion Sort", color: "#D98200", best: "O(n)", avg: "O(n²)", worst: "O(n²)", space: "O(1)", stable: "Yes", inPlace: "Yes", adaptive: "Yes", useCase: "Small datasets (N < 16) or nearly-sorted data" },
     { id: 1, name: "Merge Sort", color: "#0E7C6F", best: "O(n log n)", avg: "O(n log n)", worst: "O(n log n)", space: "O(n)", stable: "Yes", inPlace: "No", adaptive: "No", useCase: "Guaranteed O(n log n) & stability; linked lists" },
-    { id: 2, name: "Quick Sort (Med-3)", color: "#E2461F", best: "O(n log n)", avg: "O(n log n)", worst: "O(n²)", space: "O(log n)", stable: "No", inPlace: "Yes", adaptive: "No", useCase: "General in-memory sorting with optimal CPU cache performance" },
+    { id: 2, name: "Quick Sort", color: "#E2461F", best: "O(n log n)", avg: "O(n log n)", worst: "O(n²)", space: "O(log n)", stable: "No", inPlace: "Yes", adaptive: "No", useCase: "General in-memory sorting with optimal CPU cache performance" },
     { id: 3, name: "Heap Sort", color: "#7A3E8E", best: "O(n log n)", avg: "O(n log n)", worst: "O(n log n)", space: "O(1)", stable: "No", inPlace: "Yes", adaptive: "No", useCase: "Strict O(1) auxiliary space with guaranteed O(n log n)" },
-    { id: 4, name: "Adaptive Sort", color: "#1F3A5F", best: "O(n)", avg: "O(n log n)", worst: "O(n log n)", space: "O(log n)", stable: "Varies", inPlace: "Yes", adaptive: "Yes", useCase: "Standard libraries (C++ std::sort, Introsort hybrid)" },
-    { id: 5, name: "Bubble Sort", color: "#E11D48", best: "O(n)", avg: "O(n²)", worst: "O(n²)", space: "O(1)", stable: "Yes", inPlace: "Yes", adaptive: "Yes", useCase: "Educational introductory teaching; verifying sortedness" },
-    { id: 6, name: "Selection Sort", color: "#0284C7", best: "O(n²)", avg: "O(n²)", worst: "O(n²)", space: "O(1)", stable: "No", inPlace: "Yes", adaptive: "No", useCase: "EEPROM / Flash memory where writes must be minimized (≤ n - 1)" },
-    { id: 7, name: "Shell Sort", color: "#D97706", best: "O(n log n)", avg: "O(n¹.³)", worst: "O(n²)", space: "O(1)", stable: "No", inPlace: "Yes", adaptive: "Yes", useCase: "Embedded systems without stack memory for recursion" },
-    { id: 8, name: "Counting Sort", color: "#059669", best: "O(n + k)", avg: "O(n + k)", worst: "O(n + k)", space: "O(n + k)", stable: "Yes", inPlace: "No", adaptive: "No", useCase: "Dense integer keys with range k = O(n)" },
-    { id: 9, name: "Radix Sort (LSD)", color: "#4F46E5", best: "O(d·(n + b))", avg: "O(d·(n + b))", worst: "O(d·(n + b))", space: "O(n + b)", stable: "Yes", inPlace: "No", adaptive: "No", useCase: "Fixed-width integers, IP addresses, dates, fixed strings" }
+    { id: 4, name: "Adaptive Sort", color: "#1F3A5F", best: "O(n)", avg: "O(n log n)", worst: "O(n log n)", space: "O(log n)", stable: "Varies", inPlace: "Yes", adaptive: "Yes", useCase: "Input-sensitive hybrid: early exit on sorted, O(n) reversal on descending" },
+    { id: 5, name: "Bubble Sort", color: "#E11D48", best: "O(n)", avg: "O(n²)", worst: "O(n²)", space: "O(1)", stable: "Yes", inPlace: "Yes", adaptive: "Yes", useCase: "Educational introductory teaching; verifying sortedness" }
   ];
 
   // --- 1. Algorithm Definitions & Comprehensive Knowledge Base ---
@@ -113,17 +109,20 @@
         }
       ],
       cppCode: [
-        "void insertionSort(int arr[], int n) {",
-        "    for (int i = 1; i < n; i++) {",
-        "        int key = arr[i];",
-        "        int j = i - 1;",
-        "        while (j >= 0 && arr[j] > key) {",
-        "            arr[j + 1] = arr[j];",
-        "            j--;",
+        "class InsertionSort {",
+        "public:",
+        "    static void sort(int arr[], int n) {",
+        "        for (int i = 1; i < n; i++) {",
+        "            int key = arr[i];",
+        "            int j = i - 1;",
+        "            while (j >= 0 && arr[j] > key) {",
+        "                arr[j + 1] = arr[j];",
+        "                j--;",
+        "            }",
+        "            arr[j + 1] = key;",
         "        }",
-        "        arr[j + 1] = key;",
         "    }",
-        "}"
+        "};"
       ],
       pseudoCode: [
         "algorithm InsertionSort(A, n):",
@@ -206,23 +205,34 @@
         }
       ],
       cppCode: [
-        "void mergeSort(int arr[], int left, int right) {",
-        "    if (left >= right) return;",
-        "    int mid = left + (right - left) / 2;",
-        "    mergeSort(arr, left, mid);",
-        "    mergeSort(arr, mid + 1, right);",
-        "    merge(arr, left, mid, right);",
-        "}",
-        "void merge(int arr[], int left, int mid, int right) {",
-        "    int i = left, j = mid + 1, k = left;",
-        "    while (i <= mid && j <= right) {",
-        "        if (arr[i] <= arr[j]) temp[k++] = arr[i++];",
-        "        else temp[k++] = arr[j++];",
+        "class MergeSort {",
+        "public:",
+        "    static void merge(int arr[], int left, int mid, int right) {",
+        "        int n1 = mid - left + 1, n2 = right - mid;",
+        "        int L[200], R[200];",
+        "        for (int i = 0; i < n1; i++) L[i] = arr[left + i];",
+        "        for (int j = 0; j < n2; j++) R[j] = arr[mid + 1 + j];",
+        "        int i = 0, j = 0, k = left;",
+        "        while (i < n1 && j < n2) {",
+        "            if (L[i] <= R[j]) arr[k++] = L[i++];",
+        "            else arr[k++] = R[j++];",
+        "        }",
+        "        while (i < n1) arr[k++] = L[i++];",
+        "        while (j < n2) arr[k++] = R[j++];",
         "    }",
-        "    while (i <= mid) temp[k++] = arr[i++];",
-        "    while (j <= right) temp[k++] = arr[j++];",
-        "    for (int p = left; p <= right; p++) arr[p] = temp[p];",
-        "}"
+        "    static void divideAndMerge(int arr[], int left, int right) {",
+        "        if (left < right) {",
+        "            int mid = left + (right - left) / 2;",
+        "            divideAndMerge(arr, left, mid);",
+        "            divideAndMerge(arr, mid + 1, right);",
+        "            merge(arr, left, mid, right);",
+        "        }",
+        "    }",
+        "    static void sort(int arr[], int n) {",
+        "        if (n <= 1) return;",
+        "        divideAndMerge(arr, 0, n - 1);",
+        "    }",
+        "};"
       ],
       pseudoCode: [
         "algorithm MergeSort(A, left, right):",
@@ -309,29 +319,34 @@
         }
       ],
       cppCode: [
-        "void quickSort(int arr[], int low, int high) {",
-        "    if (low < high) {",
-        "        int pi = partition(arr, low, high);",
-        "        quickSort(arr, low, pi - 1);",
-        "        quickSort(arr, pi + 1, high);",
+        "class QuickSort {",
+        "public:",
+        "    static void swap(int &a, int &b) {",
+        "        int temp = a; a = b; b = temp;",
         "    }",
-        "}",
-        "int partition(int arr[], int low, int high) {",
-        "    int pivot = arr[high];",
-        "    int i = low - 1;",
-        "    for (int j = low; j < high; j++) {",
-        "        if (arr[j] < pivot) {",
-        "            i++;",
-        "            int temp = arr[i];",
-        "            arr[i] = arr[j];",
-        "            arr[j] = temp;",
+        "    static int partition(int arr[], int low, int high) {",
+        "        int pivot = arr[high], i = low - 1;",
+        "        for (int j = low; j < high; j++) {",
+        "            if (arr[j] <= pivot) {",
+        "                i++;",
+        "                swap(arr[i], arr[j]);",
+        "            }",
+        "        }",
+        "        swap(arr[i + 1], arr[high]);",
+        "        return i + 1;",
+        "    }",
+        "    static void quickSortRecursive(int arr[], int low, int high) {",
+        "        if (low < high) {",
+        "            int pi = partition(arr, low, high);",
+        "            quickSortRecursive(arr, low, pi - 1);",
+        "            quickSortRecursive(arr, pi + 1, high);",
         "        }",
         "    }",
-        "    int temp = arr[i + 1];",
-        "    arr[i + 1] = arr[high];",
-        "    arr[high] = temp;",
-        "    return i + 1;",
-        "}"
+        "    static void sort(int arr[], int n) {",
+        "        if (n <= 1) return;",
+        "        quickSortRecursive(arr, 0, n - 1);",
+        "    }",
+        "};"
       ],
       pseudoCode: [
         "algorithm QuickSort(A, low, high):",
@@ -419,29 +434,29 @@
         }
       ],
       cppCode: [
-        "void heapSort(int arr[], int n) {",
-        "    // Build max-heap",
-        "    for (int i = n / 2 - 1; i >= 0; i--)",
-        "        heapify(arr, n, i);",
-        "    // Extract maximum elements one by one",
-        "    for (int i = n - 1; i > 0; i--) {",
-        "        int temp = arr[0];",
-        "        arr[0] = arr[i];",
-        "        arr[i] = temp;",
-        "        heapify(arr, i, 0);",
+        "class HeapSort {",
+        "public:",
+        "    static void swap(int &a, int &b) {",
+        "        int temp = a; a = b; b = temp;",
         "    }",
-        "}",
-        "void heapify(int arr[], int n, int i) {",
-        "    int largest = i, l = 2 * i + 1, r = 2 * i + 2;",
-        "    if (l < n && arr[l] > arr[largest]) largest = l;",
-        "    if (r < n && arr[r] > arr[largest]) largest = r;",
-        "    if (largest != i) {",
-        "        int temp = arr[i];",
-        "        arr[i] = arr[largest];",
-        "        arr[largest] = temp;",
-        "        heapify(arr, n, largest);",
+        "    static void heapify(int arr[], int n, int i) {",
+        "        int largest = i, left = 2 * i + 1, right = 2 * i + 2;",
+        "        if (left < n && arr[left] > arr[largest]) largest = left;",
+        "        if (right < n && arr[right] > arr[largest]) largest = right;",
+        "        if (largest != i) {",
+        "            swap(arr[i], arr[largest]);",
+        "            heapify(arr, n, largest);",
+        "        }",
         "    }",
-        "}"
+        "    static void sort(int arr[], int n) {",
+        "        for (int i = n / 2 - 1; i >= 0; i--)",
+        "            heapify(arr, n, i);",
+        "        for (int i = n - 1; i > 0; i--) {",
+        "            swap(arr[0], arr[i]);",
+        "            heapify(arr, i, 0);",
+        "        }",
+        "    }",
+        "};"
       ],
       pseudoCode: [
         "algorithm HeapSort(A, n):",
@@ -530,31 +545,40 @@
         }
       ],
       cppCode: [
-        "void adaptiveSort(int arr[], int n) {",
-        "    if (n <= 1) return;",
-        "    // Step 1: Check if already sorted",
-        "    bool isSorted = true;",
-        "    for (int i = 0; i < n - 1; i++) {",
-        "        if (arr[i] > arr[i + 1]) { isSorted = false; break; }",
+        "class AdaptiveSort {",
+        "public:",
+        "    static void swap(int &a, int &b) {",
+        "        int temp = a; a = b; b = temp;",
         "    }",
-        "    if (isSorted) return;",
-        "    // Step 2: Check if reverse sorted",
-        "    bool isReverse = true;",
-        "    for (int i = 0; i < n - 1; i++) {",
-        "        if (arr[i] < arr[i + 1]) { isReverse = false; break; }",
-        "    }",
-        "    if (isReverse) {",
-        "        int i = 0, j = n - 1;",
-        "        while (i < j) {",
-        "            int temp = arr[i]; arr[i] = arr[j]; arr[j] = temp;",
-        "            i++; j--;",
+        "    static void insertionSort(int arr[], int n) {",
+        "        for (int i = 1; i < n; i++) {",
+        "            int key = arr[i], j = i - 1;",
+        "            while (j >= 0 && arr[j] > key) {",
+        "                arr[j + 1] = arr[j];",
+        "                j--;",
+        "            }",
+        "            arr[j + 1] = key;",
         "        }",
-        "        return;",
         "    }",
-        "    // Step 3: Small arrays use insertion, else quick sort",
-        "    if (n < 16) insertionSort(arr, n);",
-        "    else quickSort(arr, 0, n - 1);",
-        "}"
+        "    static void sort(int arr[], int n) {",
+        "        if (n <= 1) return;",
+        "        bool isSorted = true;",
+        "        for (int i = 0; i < n - 1; i++) {",
+        "            if (arr[i] > arr[i + 1]) { isSorted = false; break; }",
+        "        }",
+        "        if (isSorted) return;",
+        "        bool isReverse = true;",
+        "        for (int i = 0; i < n - 1; i++) {",
+        "            if (arr[i] < arr[i + 1]) { isReverse = false; break; }",
+        "        }",
+        "        if (isReverse) {",
+        "            int i = 0, j = n - 1;",
+        "            while (i < j) { swap(arr[i], arr[j]); i++; j--; }",
+        "            return;",
+        "        }",
+        "        insertionSort(arr, n);",
+        "    }",
+        "};"
       ],
       pseudoCode: [
         "algorithm AdaptiveSort(A, n):",
@@ -595,7 +619,7 @@
       ],
       cons: [
         "O(n²) worst and average case runtime on random or reverse sequences",
-        "Performs far more writes and swaps than Selection Sort or Insertion Sort",
+        "Performs far more writes and swaps than Insertion Sort",
         "Impractical for large datasets"
       ],
       whenToUse: "Introductory teaching of sorting concepts, or verifying whether a list is already sorted in a single pass.",
@@ -638,18 +662,24 @@
         }
       ],
       cppCode: [
-        "void bubbleSort(int arr[], int n) {",
-        "    for (int i = 0; i < n - 1; i++) {",
-        "        bool swapped = false;",
-        "        for (int j = 0; j < n - i - 1; j++) {",
-        "            if (arr[j] > arr[j + 1]) {",
-        "                swap(arr[j], arr[j + 1]);",
-        "                swapped = true;",
-        "            }",
-        "        }",
-        "        if (!swapped) break; // Optimized early exit",
+        "class BubbleSort {",
+        "public:",
+        "    static void swap(int &a, int &b) {",
+        "        int temp = a; a = b; b = temp;",
         "    }",
-        "}"
+        "    static void sort(int arr[], int n) {",
+        "        for (int i = 0; i < n - 1; i++) {",
+        "            bool swapped = false;",
+        "            for (int j = 0; j < n - i - 1; j++) {",
+        "                if (arr[j] > arr[j + 1]) {",
+        "                    swap(arr[j], arr[j + 1]);",
+        "                    swapped = true;",
+        "                }",
+        "            }",
+        "            if (!swapped) break;",
+        "        }",
+        "    }",
+        "};"
       ],
       pseudoCode: [
         "algorithm BubbleSort(A, n):",
@@ -660,408 +690,6 @@
         "                swap(A[j], A[j + 1])",
         "                swapped = true",
         "        if not swapped: break",
-        "    return A"
-      ]
-    },
-    {
-      id: 6,
-      name: "Selection Sort",
-      shortName: "Selection",
-      color: "#0284C7",
-      bgColor: "#F0F9FF",
-      desc: "Divides the array into sorted prefix and unsorted suffix. Repeatedly finds the minimum element from the unsorted suffix and swaps it with the first unsorted position.",
-      complexityBest: "O(n²)",
-      complexityAvg: "O(n²)",
-      complexityWorst: "O(n²)",
-      space: "O(1) in-place",
-      stable: "No",
-      inPlace: "Yes",
-      analogy: "Scanning a bookshelf for the thinnest book and placing it in slot 1. Then scanning the remaining unsorted shelf for the next thinnest and placing it in slot 2.",
-      workedExample: [
-        { step: "i = 0", text: "Array [45, 12, 89, 3, 27]. Minimum in [0..4] is 3 (at index 3). Swap arr[0] and arr[3] -> [3, 12, 89, 45, 27]." },
-        { step: "i = 1", text: "Unsorted [12, 89, 45, 27]. Minimum is 12 (at index 1). Swap arr[1] with arr[1] (no-op) -> [3, 12, 89, 45, 27]." },
-        { step: "i = 2", text: "Unsorted [89, 45, 27]. Minimum is 27 (at index 4). Swap arr[2] and arr[4] -> [3, 12, 27, 45, 89]." },
-        { step: "i = 3", text: "Unsorted [45, 89]. Minimum is 45 (at index 3). Swap arr[3] with arr[3] -> [3, 12, 27, 45, 89]. Sorted!" }
-      ],
-      pros: [
-        "Minimal memory writes: performs at most n - 1 swaps in all cases",
-        "Strictly in-place with O(1) auxiliary memory",
-        "Simple implementation without recursive stack overhead",
-        "Ideal when write operations to memory are significantly expensive (e.g. Flash/EEPROM)"
-      ],
-      cons: [
-        "Performs O(n²) comparisons in ALL cases, even when the input is already sorted",
-        "Unstable: can change relative order of identical elements",
-        "Does not adapt to existing presorted runs"
-      ],
-      whenToUse: "Systems with expensive write cycles (like Flash EEPROM memory) where minimizing memory writes to O(n) is critical.",
-      vivaQA: [
-        {
-          q: "Why does Selection Sort perform O(n²) comparisons even on a sorted array?",
-          a: "Because the inner loop must scan the entire remaining unsorted suffix arr[i .. n-1] to confirm that no smaller element exists, totaling (n - 1) + (n - 2) + ... + 1 = n(n - 1) / 2 comparisons unconditionally."
-        },
-        {
-          q: "What is the primary advantage of Selection Sort over Bubble and Insertion Sort?",
-          a: "Selection Sort performs at most (n - 1) memory writes (swaps). Bubble and Insertion sort can perform up to O(n²) writes or element shifts."
-        },
-        {
-          q: "Why is standard Selection Sort not stable?",
-          a: "A long-range swap can move the selected minimum element past equal elements. For example, sorting [4a, 4b, 2] swaps 4a with 2, resulting in [2, 4b, 4a], reversing 4a and 4b."
-        },
-        {
-          q: "What is the formal loop invariant for Selection Sort?",
-          a: "At the start of outer loop iteration i, subarray arr[0 .. i - 1] contains the smallest i elements of the entire array in sorted order, and no element in arr[i .. n - 1] is smaller than any element in arr[0 .. i - 1]."
-        }
-      ],
-      quiz: [
-        {
-          q: "How many memory swaps does Selection Sort perform in the worst case?",
-          options: ["n(n - 1) / 2", "At most n - 1", "n log n", "0"],
-          correct: 1,
-          exp: "Correct! Selection Sort performs at most one swap per outer loop iteration, totaling at most n - 1 swaps."
-        },
-        {
-          q: "Why is Selection Sort advantageous for EEPROM / Flash memory architectures?",
-          options: ["It uses the least RAM", "It minimizes memory write cycles, preserving flash wear life", "It runs in O(n) time", "It uses no comparisons"],
-          correct: 1,
-          exp: "Correct! Flash memory has limited write endurance. Selection Sort's O(n) write bound minimizes write wear."
-        },
-        {
-          q: "What is the best-case time complexity of standard Selection Sort?",
-          options: ["O(n)", "O(n log n)", "O(n²)", "O(1)"],
-          correct: 2,
-          exp: "Correct! Selection Sort always scans the full remaining suffix, making O(n²) comparisons regardless of initial input order."
-        }
-      ],
-      cppCode: [
-        "void selectionSort(int arr[], int n) {",
-        "    for (int i = 0; i < n - 1; i++) {",
-        "        int minIdx = i;",
-        "        for (int j = i + 1; j < n; j++) {",
-        "            if (arr[j] < arr[minIdx])",
-        "                minIdx = j;",
-        "        }",
-        "        if (minIdx != i) {",
-        "            int temp = arr[i];",
-        "            arr[i] = arr[minIdx];",
-        "            arr[minIdx] = temp;",
-        "        }",
-        "    }",
-        "}"
-      ],
-      pseudoCode: [
-        "algorithm SelectionSort(A, n):",
-        "    for i from 0 to n - 2:",
-        "        minIdx = i",
-        "        for j from i + 1 to n - 1:",
-        "            if A[j] < A[minIdx]:",
-        "                minIdx = j",
-        "        if minIdx != i: swap(A[i], A[minIdx])",
-        "    return A"
-      ]
-    },
-    {
-      id: 7,
-      name: "Shell Sort",
-      shortName: "Shell",
-      color: "#D97706",
-      bgColor: "#FFFBEB",
-      desc: "Generalization of insertion sort that allows exchanges of far-apart elements using diminishing gap sequences (e.g. Knuth 3h+1, Ciura, or floor(n/2)).",
-      complexityBest: "O(n log n)",
-      complexityAvg: "O(n^1.3) to O(n log² n)",
-      complexityWorst: "O(n²)",
-      space: "O(1) in-place",
-      stable: "No",
-      inPlace: "Yes",
-      analogy: "Combing tangled hair with a very wide-toothed comb first to untangle large knots, then medium teeth, and finally a fine-toothed comb for the finish.",
-      workedExample: [
-        { step: "Gap = 2", text: "Array [45, 12, 89, 3, 27]. Subarray (idx 0,2,4): [45, 89, 27] sorts to [27, 45, 89]. Subarray (idx 1,3): [12, 3] sorts to [3, 12]. Array: [27, 3, 45, 12, 89]." },
-        { step: "Gap = 1", text: "Standard Insertion Sort on nearly-sorted array [27, 3, 45, 12, 89]. Only a few small local shifts required -> [3, 12, 27, 45, 89]. Sorted!" }
-      ],
-      pros: [
-        "Sub-quadratic runtime (typically O(n^1.3)) with zero recursion overhead",
-        "Completely in-place with O(1) auxiliary space",
-        "Simple implementation without dynamic allocation or call-stack overhead",
-        "Highly efficient for medium datasets (N up to 10,000)"
-      ],
-      cons: [
-        "Performance heavily depends on the chosen gap sequence",
-        "Unstable sorting algorithm",
-        "Slower than QuickSort and MergeSort on very large arrays (N > 50,000)"
-      ],
-      whenToUse: "Embedded systems with strict memory constraints and no stack space for recursion, where O(n^1.3) performance is acceptable.",
-      vivaQA: [
-        {
-          q: "What was Donald Shell's fundamental insight in 1959?",
-          a: "Insertion Sort is slow because it only moves elements one position at a time. Shell Sort allows comparisons and swaps across a diminishing gap h, eliminating multiple inversions with a single swap."
-        },
-        {
-          q: "Is Shell Sort stable?",
-          a: "No. Elements that are separated by distance h are swapped across intervening elements, which can disrupt the relative order of duplicate items."
-        },
-        {
-          q: "Why is the final pass of Shell Sort always gap = 1?",
-          a: "A gap of 1 is identical to standard Insertion Sort, guaranteeing that the final array is 100% sorted. Prior gap passes ensure the array is already nearly sorted, making this final pass run in near-linear O(n) time."
-        },
-        {
-          q: "Name two well-known gap sequences for Shell Sort.",
-          a: "Shell's original sequence (floor(n/2^k)), Knuth's sequence (h = 3h + 1: 1, 4, 13, 40...), and Ciura's experimentally optimal sequence (1, 4, 10, 23, 57, 132, 301, 701)."
-        }
-      ],
-      quiz: [
-        {
-          q: "What does the final pass of Shell Sort (gap = 1) correspond to?",
-          options: ["Bubble Sort", "Standard Insertion Sort", "Quick Sort partition", "Heapify"],
-          correct: 1,
-          exp: "Correct! When gap = 1, Shell Sort executes an ordinary Insertion Sort on an array that has already been made largely h-sorted."
-        },
-        {
-          q: "What is the auxiliary space complexity of Shell Sort?",
-          options: ["O(1)", "O(log n)", "O(n)", "O(gap)"],
-          correct: 0,
-          exp: "Correct! Shell Sort requires only a few loop index variables, operating strictly in-place in O(1) space."
-        },
-        {
-          q: "Why does Shell Sort outperform basic Insertion Sort on large random arrays?",
-          options: ["It uses recursion", "It eliminates large inversions quickly by swapping elements separated by distance h", "It avoids all comparisons", "It allocates a hash table"],
-          correct: 1,
-          exp: "Correct! Long-distance gap swaps eliminate multiple inversions in a single step, converting the array into a nearly-sorted sequence."
-        }
-      ],
-      cppCode: [
-        "void shellSort(int arr[], int n) {",
-        "    for (int gap = n / 2; gap > 0; gap /= 2) {",
-        "        for (int i = gap; i < n; i++) {",
-        "            int temp = arr[i];",
-        "            int j = i;",
-        "            while (j >= gap && arr[j - gap] > temp) {",
-        "                arr[j] = arr[j - gap];",
-        "                j -= gap;",
-        "            }",
-        "            arr[j] = temp;",
-        "        }",
-        "    }",
-        "}"
-      ],
-      pseudoCode: [
-        "algorithm ShellSort(A, n):",
-        "    gap = floor(n / 2)",
-        "    while gap > 0:",
-        "        for i from gap to n - 1:",
-        "            temp = A[i]",
-        "            j = i",
-        "            while j >= gap and A[j - gap] > temp:",
-        "                A[j] = A[j - gap]",
-        "                j = j - gap",
-        "            A[j] = temp",
-        "        gap = floor(gap / 2)",
-        "    return A"
-      ]
-    },
-    {
-      id: 8,
-      name: "Counting Sort",
-      shortName: "Counting",
-      color: "#059669",
-      bgColor: "#ECFDF5",
-      desc: "Non-comparison sorting algorithm that counts frequency of each distinct key in range [min, max], computes running prefix sums, and places items directly into their sorted output index.",
-      complexityBest: "O(n + k)",
-      complexityAvg: "O(n + k)",
-      complexityWorst: "O(n + k)",
-      space: "O(n + k) auxiliary",
-      stable: "Yes",
-      inPlace: "No",
-      analogy: "Sorting numbered ballots by having labeled buckets (0, 1, 2, ...). Drop each ballot into its matching bucket, then read out the buckets in order.",
-      workedExample: [
-        { step: "Find Range", text: "Array [45, 12, 89, 3, 27]. Min = 3, Max = 89. Span k = 87." },
-        { step: "Frequency Count", text: "Create count array of size 87. Count each item: count[3]=1, count[12]=1, count[27]=1, count[45]=1, count[89]=1." },
-        { step: "Prefix Sums", text: "Transform count array into running cumulative positions: count[v] = count[v] + count[v-1]." },
-        { step: "Place & Copy", text: "Iterate input from right to left, place items into output array, copy back -> [3, 12, 27, 45, 89]." }
-      ],
-      pros: [
-        "Linear O(n + k) time complexity, beating the O(n log n) comparison-sort lower bound",
-        "Stable sorting algorithm when scanned backwards during output placement",
-        "Predictable execution time with zero comparison overhead"
-      ],
-      cons: [
-        "Inefficient if key range k is much larger than n (e.g. sorting [1, 1000000] takes O(k) memory)",
-        "Cannot sort arbitrary non-integer types without key mapping functions",
-        "Requires O(n + k) auxiliary memory"
-      ],
-      whenToUse: "When sorting integers known to lie in a small, dense range (k = O(n)), or as a subroutine in Radix Sort.",
-      vivaQA: [
-        {
-          q: "Why is Counting Sort not bound by the O(n log n) comparison sorting lower bound?",
-          a: "The Ω(n log n) lower bound applies exclusively to comparison-based models (decision trees). Counting Sort uses array indices as key addresses, bypassing comparisons entirely."
-        },
-        {
-          q: "Why do we iterate through the input array backwards (from n-1 down to 0) during the placement step?",
-          a: "To ensure stability! Traversing backwards places duplicates into the output array from right to left, maintaining the exact original relative ordering of equal keys."
-        },
-        {
-          q: "When does Counting Sort become worse than O(n log n) comparison sorts?",
-          a: "When the range of keys k = max - min + 1 is asymptotically larger than n log n (for example, if n = 100 but elements are up to 10,000,000, k dominates runtime and memory)."
-        },
-        {
-          q: "What is the space complexity of Counting Sort?",
-          a: "O(n + k), where n is the size of the auxiliary output array and k is the size of the frequency counter array."
-        }
-      ],
-      quiz: [
-        {
-          q: "What is the time complexity of Counting Sort where k is the key range and n is array size?",
-          options: ["O(n log k)", "O(n + k)", "O(n²)", "O(k log n)"],
-          correct: 1,
-          exp: "Correct! Counting Sort takes O(n) to tally and place elements and O(k) to initialize and accumulate the frequency table, total O(n + k)."
-        },
-        {
-          q: "Why does the placement pass scan the input from right to left?",
-          options: ["To preserve stability of identical elements", "To make it in-place", "To save memory", "To find the minimum value first"],
-          correct: 0,
-          exp: "Correct! Scanning backwards ensures that the last occurrence of an element in the input is placed in the last available slot for that key, maintaining stability."
-        },
-        {
-          q: "Can Counting Sort sort arbitrary negative integers?",
-          options: ["No, it only works for positive integers", "Yes, by offsetting all values by subtracting the minimum value", "Only if array size is even", "Only in O(n²) time"],
-          correct: 1,
-          exp: "Correct! By calculating offset = -min, all indices map to non-negative values [0 .. max - min]."
-        }
-      ],
-      cppCode: [
-        "void countingSort(int arr[], int n) {",
-        "    if (n <= 1) return;",
-        "    int minVal = arr[0], maxVal = arr[0];",
-        "    for (int i = 1; i < n; i++) {",
-        "        if (arr[i] < minVal) minVal = arr[i];",
-        "        if (arr[i] > maxVal) maxVal = arr[i];",
-        "    }",
-        "    int range = maxVal - minVal + 1;",
-        "    int* count = new int[range]();",
-        "    int* output = new int[n];",
-        "    for (int i = 0; i < n; i++) count[arr[i] - minVal]++;",
-        "    for (int i = 1; i < range; i++) count[i] += count[i - 1];",
-        "    for (int i = n - 1; i >= 0; i--) {",
-        "        output[count[arr[i] - minVal] - 1] = arr[i];",
-        "        count[arr[i] - minVal]--;",
-        "    }",
-        "    for (int i = 0; i < n; i++) arr[i] = output[i];",
-        "    delete[] count;",
-        "    delete[] output;",
-        "}"
-      ],
-      pseudoCode: [
-        "algorithm CountingSort(A, n):",
-        "    minVal = min(A), maxVal = max(A)",
-        "    range = maxVal - minVal + 1",
-        "    count = array of zeros of size range",
-        "    output = array of size n",
-        "    for i from 0 to n - 1: count[A[i] - minVal]++",
-        "    for i from 1 to range - 1: count[i] += count[i - 1]",
-        "    for i from n - 1 down to 0:",
-        "        output[count[A[i] - minVal] - 1] = A[i]",
-        "        count[A[i] - minVal]--",
-        "    for i from 0 to n - 1: A[i] = output[i]",
-        "    return A"
-      ]
-    },
-    {
-      id: 9,
-      name: "Radix Sort (LSD)",
-      shortName: "Radix",
-      color: "#4F46E5",
-      bgColor: "#EEF2FF",
-      desc: "Non-comparison integer sort that processes elements digit by digit, from Least Significant Digit (LSD) to Most Significant Digit (MSD), using a stable sub-sort (Counting Sort) for each pass.",
-      complexityBest: "O(d · (n + b))",
-      complexityAvg: "O(d · (n + b))",
-      complexityWorst: "O(d · (n + b))",
-      space: "O(n + b) auxiliary",
-      stable: "Yes",
-      inPlace: "No",
-      analogy: "Sorting punch cards on a mechanical card-sorter machine. You sort by the rightmost column into 10 pockets, restack them, then sort by the next column to the left, repeating until the entire card is sorted.",
-      workedExample: [
-        { step: "Init", text: "Array [45, 12, 89, 3, 27]. Max = 89, so 2 digits (base 10, exp = 1, 10)." },
-        { step: "Pass 1: 1s digit", text: "Digits: 12 (2), 3 (3), 45 (5), 27 (7), 89 (9). Stable count sort on 1s column -> [12, 3, 45, 27, 89]." },
-        { step: "Pass 2: 10s digit", text: "Digits: 3 (0), 12 (1), 27 (2), 45 (4), 89 (8). Stable count sort on 10s column -> [3, 12, 27, 45, 89]. Sorted!" }
-      ],
-      pros: [
-        "Linear time O(d · (n + b)) for fixed-width integers, beating O(n log n)",
-        "Stable sorting: preserves original order of records with equal keys",
-        "Highly effective for fixed-length strings, dates, IP addresses, and 32/64-bit integers"
-      ],
-      cons: [
-        "High constant factors and poor cache locality compared to QuickSort on modern CPUs",
-        "Requires auxiliary memory for the output buffer and base bucket counts",
-        "Not in-place"
-      ],
-      whenToUse: "Sorting large collections of fixed-length integers (e.g. 32-bit keys) or formatted text records (e.g. phone numbers, zip codes, IP addresses).",
-      vivaQA: [
-        {
-          q: "Why must the sub-sorting algorithm used in Radix Sort be strictly stable?",
-          a: "If the sub-sort were not stable, sorting by a higher-order digit would scramble the ordering previously established by lower-order digits, ruining the algorithm's correctness."
-        },
-        {
-          q: "What do the variables d, n, and b represent in Radix Sort's complexity formula O(d(n + b))?",
-          a: "n is the number of elements, d is the maximum number of digits (log_b(max_val)), and b is the numerical base (radix) being used (e.g. 10 for decimal, 256 for bytes)."
-        },
-        {
-          q: "What is the difference between LSD and MSD Radix Sort?",
-          a: "LSD processes digits from right to left iteratively using a stable sub-sort on the entire array. MSD processes from left to right recursively, partitioning the array into separate sub-buckets."
-        },
-        {
-          q: "How can Radix Sort be adapted to handle negative integers?",
-          a: "Either partition the array into negative and positive halves first and invert the negative half, or apply an integer bias offset (e.g. x + INT_MAX) to convert signed integers into unsigned representation."
-        }
-      ],
-      quiz: [
-        {
-          q: "Why is stability essential for the sub-sorting passes of LSD Radix Sort?",
-          options: ["To prevent memory leaks", "Because higher-order digit passes rely on the preserved order of lower-order digits", "To make it in-place", "To reduce the number of passes"],
-          correct: 1,
-          exp: "Correct! When two numbers share the same higher-order digit (e.g. 42 and 47), the stable pass preserves their lower-order ordering (2 before 7)."
-        },
-        {
-          q: "What is the time complexity of Radix Sort for n integers with at most d digits in base b?",
-          options: ["O(n log n)", "O(d * (n + b))", "O(n²)", "O(d * n²)"],
-          correct: 1,
-          exp: "Correct! There are d passes, each performing a stable Counting Sort on n elements across b buckets, totaling O(d(n + b))."
-        },
-        {
-          q: "Which digit does LSD Radix Sort process first?",
-          options: ["The most significant digit (leftmost)", "The least significant digit (rightmost)", "The middle digit", "The median digit"],
-          correct: 1,
-          exp: "Correct! LSD stands for Least Significant Digit, beginning at the ones place (exp = 1) and moving leftward."
-        }
-      ],
-      cppCode: [
-        "void radixSortLSD(int arr[], int n) {",
-        "    if (n <= 1) return;",
-        "    int maxVal = arr[0];",
-        "    for (int i = 1; i < n; i++) if (arr[i] > maxVal) maxVal = arr[i];",
-        "    for (int exp = 1; maxVal / exp > 0; exp *= 10) {",
-        "        countSortDigit(arr, n, exp);",
-        "    }",
-        "}",
-        "void countSortDigit(int arr[], int n, int exp) {",
-        "    int* output = new int[n];",
-        "    int count[10] = {0};",
-        "    for (int i = 0; i < n; i++) count[(arr[i] / exp) % 10]++;",
-        "    for (int i = 1; i < 10; i++) count[i] += count[i - 1];",
-        "    for (int i = n - 1; i >= 0; i--) {",
-        "        int d = (arr[i] / exp) % 10;",
-        "        output[count[d] - 1] = arr[i];",
-        "        count[d]--;",
-        "    }",
-        "    for (int i = 0; i < n; i++) arr[i] = output[i];",
-        "    delete[] output;",
-        "}"
-      ],
-      pseudoCode: [
-        "algorithm RadixSortLSD(A, n):",
-        "    maxVal = max(A)",
-        "    exp = 1",
-        "    while maxVal / exp > 0:",
-        "        CountSortByDigit(A, n, exp)",
-        "        exp = exp * 10",
         "    return A"
       ]
     }
@@ -2675,19 +2303,19 @@
     const insights = [
       {
         q: "Empirical Finding 1: Presorted & Monotone Reversal Behavior",
-        a: "On sorted input sequences, Insertion Sort and Adaptive Sort achieve optimal O(n) linear performance with zero element shifts. On strictly reverse-sorted data, Adaptive Sort detects the monotonic descending ordering and reverses the sequence in floor(n/2) symmetric swaps with 0 comparisons, whereas unadapted quadratic algorithms (Bubble Sort, Selection Sort) degrade to their maximum O(n²) comparison and inversion bounds."
+        a: "On sorted input sequences, Insertion Sort and Adaptive Sort achieve optimal O(n) linear performance with zero element shifts. On strictly reverse-sorted data, Adaptive Sort detects the monotonic descending ordering and reverses the sequence in floor(n/2) symmetric swaps with 0 comparisons, whereas unadapted quadratic algorithms (Bubble Sort) degrade to their maximum O(n²) comparison and inversion bounds."
       },
       {
         q: "Empirical Finding 2: Cache Locality vs Recursive Overhead (Random N = 200)",
-        a: "Across random permutations, Quick Sort (Median-of-Three) and Introsort consistently outpace Heap Sort despite identical O(n log n) average asymptotic bounds. This empirical speedup stems from high spatial cache locality (sequential memory traversals in Hoare partitioning) versus Heap Sort's large index stride jumps (2i+1, 2i+2) that induce frequent L1/L2 CPU cache line evictions."
+        a: "Across random permutations, Quick Sort (Median-of-Three) consistently outpaces Heap Sort despite identical O(n log n) average asymptotic bounds. This empirical speedup stems from high spatial cache locality (sequential memory traversals in partitioning) versus Heap Sort's large index stride jumps (2i+1, 2i+2) that induce frequent L1/L2 CPU cache line evictions."
       },
       {
-        q: "Empirical Finding 3: Duplicate Density & Non-Comparison Lower Bounds",
-        a: "On duplicate-heavy datasets, non-comparison Counting Sort and LSD Radix Sort achieve predictable O(n + k) throughput that bypasses the Ω(n log n) comparison-sort theoretical limit. In-place comparison sorts with median-of-three pivots maintain balanced O(log n) recursion depths, confirming resilience against degenerate call stacks."
+        q: "Empirical Finding 3: Small-N Thresholds & Adaptive Dispatching",
+        a: "For small partitions (N < 16), Insertion Sort outperforms divide-and-conquer methods because sequential cache access and absence of function call overhead compensate for its quadratic worst case. Adaptive Sort capitalizes on this by switching directly to Insertion Sort for small subarrays."
       },
       {
         q: "Empirical Finding 4: Auxiliary Space & Memory Allocation Tradeoffs",
-        a: "Heap Sort and Selection Sort operate strictly in-place with O(1) auxiliary bytes. Conversely, Merge Sort requires 4N bytes of auxiliary RAM for its staging buffer, while Radix and Counting Sort require auxiliary frequency buckets, confirming the fundamental engineering tradeoff between execution time and spatial memory consumption."
+        a: "Heap Sort, Bubble Sort, and Insertion Sort operate strictly in-place with O(1) auxiliary bytes. Conversely, Merge Sort requires auxiliary RAM for its staging buffer, confirming the fundamental engineering tradeoff between execution time and spatial memory consumption."
       }
     ];
 
@@ -2973,7 +2601,7 @@
     report += "\n## 3. Empirical Findings & Academic Conclusions\n\n";
     report += "1. **Presorted & Reverse Analysis**: Insertion Sort and Adaptive Sort achieve linear O(n) runtime on sorted arrays with 0 shifts. On strictly descending sequences, Adaptive Sort detected monotonic reverse ordering and inverted the array in floor(n/2) symmetric swaps with zero element comparisons.\n";
     report += "2. **Cache Locality**: On random sequences, Quick Sort (Median-of-Three) outpaces Heap Sort due to contiguous spatial memory cache hits in Hoare partitioning versus Heap Sort's large index strides.\n";
-    report += "3. **Non-Comparison Distribution Bounds**: Counting Sort and LSD Radix Sort run in linear O(n + k) and O(d(n + b)) time respectively, bypassing the Ω(n log n) comparison lower bound on suitable integer sequences.\n";
+    report += "3. **Divide-and-Conquer vs In-Place Tradeoffs**: Quick Sort and Heap Sort achieve in-place O(n log n) efficiency, while Merge Sort guarantees predictable performance at the cost of O(n) auxiliary memory.\n";
 
     navigator.clipboard.writeText(report).then(() => {
       showToast("Copied complete lab report (Theory + Benchmarks) to clipboard!");
@@ -3293,133 +2921,6 @@
         }
         if (!swapped) break;
       }
-    } else if (algoId === 6) { // Selection Sort
-      auxBytes = 4;
-      for (let i = 0; i < n - 1; i++) {
-        let minIdx = i;
-        for (let j = i + 1; j < n; j++) {
-          comparisons++;
-          if (recordTrace) {
-            trace.push({
-              type: OP_COMPARE, index1: minIdx, index2: j, value: arr[minIdx], line: 5,
-              message: `Selection: Comparing current minimum arr[${minIdx}] (${arr[minIdx]}) with arr[${j}] (${arr[j]}).`,
-              snapshot: Array.from(arr), meta: ""
-            });
-          }
-          if (arr[j] < arr[minIdx]) minIdx = j;
-        }
-        if (minIdx !== i) {
-          const tmp = arr[i]; arr[i] = arr[minIdx]; arr[minIdx] = tmp;
-          swaps++;
-          if (recordTrace) {
-            trace.push({
-              type: OP_SWAP, index1: i, index2: minIdx, value: arr[i], line: 8,
-              message: `Swapped unsorted head [${i}] with minimum element ${arr[i]} at [${minIdx}].`,
-              snapshot: Array.from(arr), meta: ""
-            });
-          }
-        }
-        if (recordTrace) {
-          trace.push({
-            type: OP_MARK_SORTED, index1: i, index2: -1, value: arr[i], line: 8,
-            message: `Locked minimum element ${arr[i]} into sorted position [${i}].`,
-            snapshot: Array.from(arr), meta: ""
-          });
-        }
-      }
-    } else if (algoId === 7) { // Shell Sort
-      auxBytes = 4;
-      for (let gap = Math.floor(n / 2); gap > 0; gap = Math.floor(gap / 2)) {
-        for (let i = gap; i < n; i++) {
-          const temp = arr[i];
-          let j = i;
-          while (j >= gap) {
-            comparisons++;
-            if (recordTrace) {
-              trace.push({
-                type: OP_COMPARE, index1: j - gap, index2: j, value: temp, line: 6,
-                message: `Shell Sort (gap=${gap}): Comparing arr[${j-gap}] (${arr[j-gap]}) with temp (${temp}).`,
-                snapshot: Array.from(arr), meta: ""
-              });
-            }
-            if (arr[j - gap] > temp) {
-              arr[j] = arr[j - gap];
-              moves++;
-              if (recordTrace) {
-                trace.push({
-                  type: OP_OVERWRITE, index1: j, index2: j - gap, value: arr[j], line: 7,
-                  message: `Gap shift: Moved arr[${j-gap}] (${arr[j]}) forward by gap ${gap} to index ${j}.`,
-                  snapshot: Array.from(arr), meta: ""
-                });
-              }
-              j -= gap;
-            } else {
-              break;
-            }
-          }
-          arr[j] = temp;
-          moves++;
-        }
-      }
-    } else if (algoId === 8) { // Counting Sort
-      if (n > 1) {
-        let minVal = arr[0], maxVal = arr[0];
-        for (let i = 1; i < n; i++) {
-          comparisons += 2;
-          if (arr[i] < minVal) minVal = arr[i];
-          if (arr[i] > maxVal) maxVal = arr[i];
-        }
-        const range = maxVal - minVal + 1;
-        auxBytes = (range + n) * 4;
-        const count = new Int32Array(range);
-        const output = new Int32Array(n);
-        for (let i = 0; i < n; i++) count[arr[i] - minVal]++;
-        for (let i = 1; i < range; i++) count[i] += count[i - 1];
-        for (let i = n - 1; i >= 0; i--) {
-          const target = count[arr[i] - minVal] - 1;
-          output[target] = arr[i];
-          count[arr[i] - minVal]--;
-          moves++;
-          if (recordTrace) {
-            trace.push({
-              type: OP_OVERWRITE, index1: target, index2: i, value: arr[i], line: 13,
-              message: `Counting Sort: Placed element ${arr[i]} directly into destination rank [${target}].`,
-              snapshot: Array.from(output), meta: ""
-            });
-          }
-        }
-        for (let i = 0; i < n; i++) arr[i] = output[i];
-      }
-    } else if (algoId === 9) { // Radix Sort LSD
-      if (n > 1) {
-        let maxVal = arr[0];
-        for (let i = 1; i < n; i++) {
-          comparisons++;
-          if (arr[i] > maxVal) maxVal = arr[i];
-        }
-        auxBytes = (10 + n) * 4;
-        for (let exp = 1; Math.floor(maxVal / exp) > 0; exp *= 10) {
-          const output = new Int32Array(n);
-          const count = new Int32Array(10);
-          for (let i = 0; i < n; i++) count[Math.floor(arr[i] / exp) % 10]++;
-          for (let i = 1; i < 10; i++) count[i] += count[i - 1];
-          for (let i = n - 1; i >= 0; i--) {
-            const digit = Math.floor(arr[i] / exp) % 10;
-            const target = count[digit] - 1;
-            output[target] = arr[i];
-            count[digit]--;
-            moves++;
-            if (recordTrace) {
-              trace.push({
-                type: OP_OVERWRITE, index1: target, index2: i, value: arr[i], line: 15,
-                message: `Radix Sort (digit exp=${exp}): Positioned ${arr[i]} into bucket [${target}].`,
-                snapshot: Array.from(output), meta: ""
-              });
-            }
-          }
-          for (let i = 0; i < n; i++) arr[i] = output[i];
-        }
-      }
     }
 
     const tEnd = performance.now();
@@ -3513,14 +3014,6 @@
       inv = "Adaptive Guard: Dispatches minimal asymptotic strategy based on inversions and size.";
     } else if (algoId === 5) {
       inv = `Bubble Invariant: Suffix arr[n-${step.index1 || 1} .. n-1] holds the largest elements in final order.`;
-    } else if (algoId === 6) {
-      inv = `Selection Invariant: arr[0 .. ${Math.max(0, step.index1 - 1)}] holds the smallest elements in final position.`;
-    } else if (algoId === 7) {
-      inv = "Diminishing Gap Invariant: Elements separated by gap h form an h-sorted sequence.";
-    } else if (algoId === 8) {
-      inv = "Non-Comparison Invariant: Frequency prefix sum assigns destination index without comparisons.";
-    } else if (algoId === 9) {
-      inv = "LSD Radix Invariant: Array is stably ordered by the lower digits up to current exponent.";
     }
 
     if (invariantEl) invariantEl.textContent = inv;
@@ -3587,10 +3080,10 @@
       exp: "Without extra space, inserting elements into their merged place requires shifting subsequent items right, degrading O(n) merge to O(n²)."
     },
     {
-      q: "Which of the following algorithms guarantees at most (n - 1) memory writes (swaps) on any input array?",
-      options: ["Bubble Sort", "Insertion Sort", "Selection Sort", "Merge Sort"],
+      q: "Which algorithm builds a binary max-heap and guarantees O(n log n) runtime with O(1) extra space?",
+      options: ["Bubble Sort", "Insertion Sort", "Heap Sort", "Merge Sort"],
       correct: 2,
-      exp: "Selection Sort performs at most one swap per outer loop iteration, guaranteeing <= n - 1 swaps in all cases!"
+      exp: "Heap Sort builds a max-heap in-place and repeatedly extracts the root, guaranteeing O(n log n) time in O(1) auxiliary space!"
     },
     {
       q: "In Insertion Sort on [10, 20, 30, 40], if we insert new key 25, how many element shifts occur?",
@@ -3599,16 +3092,16 @@
       exp: "40 > 25 shifts right; 30 > 25 shifts right; 20 < 25 breaks loop. Exactly 2 shifts occur!"
     },
     {
-      q: "Why is Counting Sort able to achieve O(n + k) time, beating the Ω(n log n) comparison lower bound?",
-      options: ["It runs multithreaded", "It uses array indexing as direct addressing, bypassing pairwise comparisons", "It skips duplicate keys", "It uses binary search trees"],
+      q: "How does Adaptive Sort handle an array that is already strictly reverse-sorted?",
+      options: ["Degrades to O(n²)", "Detects descending order and reverses in-place in O(n) time", "Requires O(n log n) comparisons", "Throws an error"],
       correct: 1,
-      exp: "Decision tree lower bounds only apply to comparison sorts. Direct arithmetic key indexing bypasses comparisons entirely."
+      exp: "Adaptive Sort detects the descending pattern and reverses it in-place symmetrically in O(n) time with 0 comparisons!"
     },
     {
-      q: "In LSD Radix Sort base 10, what is the role of the exponent variable exp = 1, 10, 100...?",
-      options: ["It tracks recursion depth", "It isolates the current digit column (exp=1 for ones, exp=10 for tens)", "It squares the numbers", "It allocates RAM buckets"],
+      q: "In Quick Sort, what is the primary purpose of the partition function?",
+      options: ["To find the median element iteratively", "To place the pivot in its final sorted position with smaller elements on the left", "To reverse the array", "To allocate temporary buffers"],
       correct: 1,
-      exp: "(val / exp) % 10 isolates the single target digit column for the stable sub-sort pass."
+      exp: "Partitioning places the chosen pivot into its final sorted position with all smaller elements to its left and larger to its right."
     }
   ];
 
@@ -4330,24 +3823,15 @@
 
     // Mode A: Manual Sort Challenge Buttons
     const btnRuleBubble = document.getElementById('btnGameRuleBubble');
-    const btnRuleSelection = document.getElementById('btnGameRuleSelection');
     const btnRuleFree = document.getElementById('btnGameRuleFree');
     const btnHint = document.getElementById('btnGameHint');
     const btnCheck = document.getElementById('btnGameCheck');
     const btnShuffle = document.getElementById('btnGameNewShuffle');
 
-    if (btnRuleBubble && btnRuleSelection && btnRuleFree) {
+    if (btnRuleBubble && btnRuleFree) {
       btnRuleBubble.addEventListener('click', () => {
         state.arcade.manual.rule = 'bubble';
         btnRuleBubble.classList.add('active');
-        btnRuleSelection.classList.remove('active');
-        btnRuleFree.classList.remove('active');
-        updateManualGameUI();
-      });
-      btnRuleSelection.addEventListener('click', () => {
-        state.arcade.manual.rule = 'selection';
-        btnRuleSelection.classList.add('active');
-        btnRuleBubble.classList.remove('active');
         btnRuleFree.classList.remove('active');
         updateManualGameUI();
       });
@@ -4355,7 +3839,6 @@
         state.arcade.manual.rule = 'free';
         btnRuleFree.classList.add('active');
         btnRuleBubble.classList.remove('active');
-        btnRuleSelection.classList.remove('active');
         updateManualGameUI();
       });
     }

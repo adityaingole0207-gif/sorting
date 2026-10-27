@@ -437,85 +437,7 @@ namespace BasicDSA {
         }
     }
 
-    // 7. Shell Sort
-    void shellSort(int arr[], int n) {
-        for (int gap = n / 2; gap > 0; gap /= 2) {
-            for (int i = gap; i < n; i++) {
-                int temp = arr[i];
-                int j;
-                for (j = i; j >= gap && arr[j - gap] > temp; j -= gap) {
-                    arr[j] = arr[j - gap];
-                }
-                arr[j] = temp;
-            }
-        }
-    }
-
-    // 8. Counting Sort
-    void countingSort(int arr[], int n) {
-        if (n <= 1) return;
-        int minVal = arr[0], maxVal = arr[0];
-        for (int i = 1; i < n; i++) {
-            if (arr[i] < minVal) minVal = arr[i];
-            if (arr[i] > maxVal) maxVal = arr[i];
-        }
-        int range = maxVal - minVal + 1;
-        int* count = new int[range]();
-        int* output = new int[n];
-
-        for (int i = 0; i < n; i++)
-            count[arr[i] - minVal]++;
-
-        for (int i = 1; i < range; i++)
-            count[i] += count[i - 1];
-
-        for (int i = n - 1; i >= 0; i--) {
-            output[count[arr[i] - minVal] - 1] = arr[i];
-            count[arr[i] - minVal]--;
-        }
-
-        for (int i = 0; i < n; i++)
-            arr[i] = output[i];
-
-        delete[] count;
-        delete[] output;
-    }
-
-    // 9. Radix Sort (LSD)
-    void countSortDigit(int arr[], int n, int exp) {
-        int* output = new int[n];
-        int count[10] = {0};
-
-        for (int i = 0; i < n; i++)
-            count[(arr[i] / exp) % 10]++;
-
-        for (int i = 1; i < 10; i++)
-            count[i] += count[i - 1];
-
-        for (int i = n - 1; i >= 0; i--) {
-            int d = (arr[i] / exp) % 10;
-            output[count[d] - 1] = arr[i];
-            count[d]--;
-        }
-
-        for (int i = 0; i < n; i++)
-            arr[i] = output[i];
-
-        delete[] output;
-    }
-
-    void radixSort(int arr[], int n) {
-        if (n <= 1) return;
-        int maxVal = arr[0];
-        for (int i = 1; i < n; i++) {
-            if (arr[i] > maxVal) maxVal = arr[i];
-        }
-        for (int exp = 1; maxVal / exp > 0; exp *= 10) {
-            countSortDigit(arr, n, exp);
-        }
-    }
-
-    // 10. Adaptive Sort (Direct 3-way check: sorted -> reverse -> small insertion/quick)
+    // 6. Adaptive Sort (Direct 3-way check: sorted -> reverse -> small insertion/quick)
     void adaptiveSort(int arr[], int n) {
         if (n <= 1) return;
 
@@ -1105,309 +1027,7 @@ void bubbleSort(int* arr, int size, SortMetrics& metrics, bool recordTrace) {
 }
 
 // ============================================================================
-// 9. ALGORITHM 7: SELECTION SORT
-// ============================================================================
-/**
- * VIVA EXPLANATION:
- * - Real-life analogy: Selecting the shortest student in a group, placing them
- *   at position 0, then finding the second shortest, and so forth.
- * - Invariant: arr[0..i-1] is the sorted prefix containing the i smallest elements.
- * - Time Complexity: O(n^2) in ALL cases (best, average, worst).
- * - Swaps: Exactly n - 1 swaps (minimal writes, useful when memory write cost is high).
- * - Stability: Unstable (long distance swap can leapfrog equal elements).
- */
-void selectionSort(int* arr, int size, SortMetrics& metrics, bool recordTrace) {
-    metrics.algorithmName = "Selection Sort";
-    metrics.arraySize = size;
-    metrics.auxiliaryMemoryBytes = sizeof(int) * 2; // min_idx, temp
-    metrics.maxRecursionDepth = 0;
-
-    if (size <= 1) {
-        metrics.isCorrect = true;
-        return;
-    }
-
-    for (int i = 0; i < size - 1; ++i) {
-        int minIdx = i;
-        if (recordTrace) {
-            metrics.trace.push_back({OP_PIVOT, i, -1, arr[i], 2, "Pass " + std::to_string(i + 1) + ": Initializing minimum candidate at index " + std::to_string(i) + " (value = " + std::to_string(arr[i]) + ").", makeSnapshot(arr, size), "min_init"});
-        }
-
-        for (int j = i + 1; j < size; ++j) {
-            metrics.comparisons++;
-            if (recordTrace) {
-                metrics.trace.push_back({OP_COMPARE, j, minIdx, arr[j], 4, "Comparing current element arr[" + std::to_string(j) + "] (" + std::to_string(arr[j]) + ") against current minimum (" + std::to_string(arr[minIdx]) + ").", makeSnapshot(arr, size), ""});
-            }
-
-            if (arr[j] < arr[minIdx]) {
-                minIdx = j;
-                if (recordTrace) {
-                    metrics.trace.push_back({OP_PIVOT, minIdx, i, arr[minIdx], 5, "Found new minimum: " + std::to_string(arr[minIdx]) + " at index " + std::to_string(minIdx) + ".", makeSnapshot(arr, size), "new_min"});
-                }
-            }
-        }
-
-        if (minIdx != i) {
-            doSwap(arr, i, minIdx, size, 7, "Swapped found minimum " + std::to_string(arr[minIdx]) + " into target sorted prefix index " + std::to_string(i) + ".", metrics, recordTrace);
-        }
-
-        if (recordTrace) {
-            metrics.trace.push_back({OP_MARK_SORTED, i, -1, arr[i], 9, "Index " + std::to_string(i) + " permanently locked with value " + std::to_string(arr[i]) + ".", makeSnapshot(arr, size), ""});
-        }
-    }
-
-    if (recordTrace && size > 0) {
-        metrics.trace.push_back({OP_MARK_SORTED, size - 1, -1, arr[size - 1], 10, "Final element locked. Selection sort complete.", makeSnapshot(arr, size), ""});
-    }
-}
-
-// ============================================================================
-// 10. ALGORITHM 8: SHELL SORT (DIMINISHING GAP)
-// ============================================================================
-/**
- * VIVA EXPLANATION:
- * - Real-life analogy: Comb-sorting intertwined hair or combing fibers: first
- *   untangles big wide knots from far away, then smoothly combs adjacent hairs.
- * - Invariant: Array is h-sorted at each stage, reducing distant inversions quickly.
- * - Time Complexity: O(n log^2 n) to O(n^(1.3)) depending on gap sequence.
- * - Space: O(1) in-place auxiliary memory.
- * - Stability: Unstable (distant gap shifts break stability).
- */
-void shellSort(int* arr, int size, SortMetrics& metrics, bool recordTrace) {
-    metrics.algorithmName = "Shell Sort";
-    metrics.arraySize = size;
-    metrics.auxiliaryMemoryBytes = sizeof(int) * 3;
-    metrics.maxRecursionDepth = 0;
-
-    if (size <= 1) {
-        metrics.isCorrect = true;
-        return;
-    }
-
-    // Knuth gap sequence or standard N/2 diminishing increments
-    for (int gap = size / 2; gap > 0; gap /= 2) {
-        if (recordTrace) {
-            metrics.trace.push_back({OP_INFO, gap, -1, gap, 2, "Entering gap phase h = " + std::to_string(gap) + ". Performing h-interleaved insertion sorting.", makeSnapshot(arr, size), "gap"});
-        }
-
-        for (int i = gap; i < size; ++i) {
-            int temp = arr[i];
-            int j = i;
-
-            metrics.comparisons++;
-            if (recordTrace) {
-                metrics.trace.push_back({OP_COMPARE, j - gap, i, temp, 5, "Comparing arr[" + std::to_string(j - gap) + "] (" + std::to_string(arr[j - gap]) + ") with key (" + std::to_string(temp) + ") across gap distance " + std::to_string(gap) + ".", makeSnapshot(arr, size), ""});
-            }
-
-            while (j >= gap && arr[j - gap] > temp) {
-                arr[j] = arr[j - gap];
-                metrics.moves++;
-                if (recordTrace) {
-                    metrics.trace.push_back({OP_OVERWRITE, j, j - gap, arr[j - gap], 6, "Shifted " + std::to_string(arr[j - gap]) + " right by gap " + std::to_string(gap) + " to index " + std::to_string(j) + ".", makeSnapshot(arr, size), ""});
-                }
-                j -= gap;
-
-                if (j >= gap) {
-                    metrics.comparisons++;
-                    if (recordTrace) {
-                        metrics.trace.push_back({OP_COMPARE, j - gap, -1, temp, 5, "Comparing arr[" + std::to_string(j - gap) + "] (" + std::to_string(arr[j - gap]) + ") with key (" + std::to_string(temp) + ").", makeSnapshot(arr, size), ""});
-                    }
-                }
-            }
-
-            arr[j] = temp;
-            metrics.moves++;
-            if (recordTrace) {
-                metrics.trace.push_back({OP_OVERWRITE, j, -1, temp, 8, "Placed key " + std::to_string(temp) + " at gap destination index " + std::to_string(j) + ".", makeSnapshot(arr, size), ""});
-            }
-        }
-    }
-
-    if (recordTrace) {
-        for (int k = 0; k < size; ++k) {
-            metrics.trace.push_back({OP_MARK_SORTED, k, -1, arr[k], 10, "Shell sort complete. Array verified in-order.", makeSnapshot(arr, size), ""});
-        }
-    }
-}
-
-// ============================================================================
-// 11. ALGORITHM 9: COUNTING SORT (NON-COMPARISON KEY DISTRIBUTION)
-// ============================================================================
-/**
- * VIVA EXPLANATION:
- * - Real-life analogy: Counting tally marks for voting ballots into labeled candidate boxes.
- * - Time Complexity: O(n + k) linear time where k is value range (max - min + 1).
- * - Space: O(n + k) auxiliary memory for count tally and output staging array.
- * - Stability: Stable when populated from right to left using prefix sums.
- */
-void countingSort(int* arr, int size, SortMetrics& metrics, bool recordTrace) {
-    metrics.algorithmName = "Counting Sort";
-    metrics.arraySize = size;
-    metrics.maxRecursionDepth = 0;
-
-    if (size <= 1) {
-        metrics.isCorrect = true;
-        return;
-    }
-
-    int minVal = arr[0], maxVal = arr[0];
-    for (int i = 1; i < size; ++i) {
-        metrics.comparisons++;
-        if (arr[i] < minVal) minVal = arr[i];
-        if (arr[i] > maxVal) maxVal = arr[i];
-    }
-
-    int range = maxVal - minVal + 1;
-    // Safety check for extreme ranges
-    if (range > 200000) {
-        // Fall back to insertion
-        insertionSort(arr, size, metrics, recordTrace);
-        return;
-    }
-
-    metrics.auxiliaryMemoryBytes = (range * sizeof(int)) + (size * sizeof(int));
-    int* count = new int[range]();
-    int* output = new int[size];
-
-    if (recordTrace) {
-        metrics.trace.push_back({OP_INFO, minVal, maxVal, range, 2, "Determined key spectrum: min = " + std::to_string(minVal) + ", max = " + std::to_string(maxVal) + ", range = " + std::to_string(range) + ". Allocating frequency buckets.", makeSnapshot(arr, size), "range"});
-    }
-
-    // Step 1: Count occurrences
-    for (int i = 0; i < size; ++i) {
-        count[arr[i] - minVal]++;
-        metrics.moves++;
-        if (recordTrace) {
-            metrics.trace.push_back({OP_COMPARE, i, -1, arr[i], 4, "Tallying frequency: element " + std::to_string(arr[i]) + " incremented bucket [" + std::to_string(arr[i] - minVal) + "] to " + std::to_string(count[arr[i] - minVal]) + ".", makeSnapshot(arr, size), ""});
-        }
-    }
-
-    // Step 2: Cumulative prefix sum
-    for (int i = 1; i < range; ++i) {
-        count[i] += count[i - 1];
-        metrics.moves++;
-    }
-
-    // Step 3: Place elements into output array stably
-    for (int i = size - 1; i >= 0; --i) {
-        int pos = count[arr[i] - minVal] - 1;
-        output[pos] = arr[i];
-        count[arr[i] - minVal]--;
-        metrics.moves++;
-    }
-
-    // Step 4: Copy back to original array
-    for (int i = 0; i < size; ++i) {
-        arr[i] = output[i];
-        metrics.moves++;
-        if (recordTrace) {
-            metrics.trace.push_back({OP_OVERWRITE, i, -1, arr[i], 8, "Staged bucket element " + std::to_string(arr[i]) + " into final sorted position [" + std::to_string(i) + "].", makeSnapshot(arr, size), ""});
-        }
-    }
-
-    if (recordTrace) {
-        for (int k = 0; k < size; ++k) {
-            metrics.trace.push_back({OP_MARK_SORTED, k, -1, arr[k], 10, "Counting sort complete in linear O(n + k) time.", makeSnapshot(arr, size), ""});
-        }
-    }
-
-    delete[] count;
-    delete[] output;
-}
-
-// ============================================================================
-// 12. ALGORITHM 10: RADIX SORT (LSD - LEAST SIGNIFICANT DIGIT)
-// ============================================================================
-/**
- * VIVA EXPLANATION:
- * - Real-life analogy: Sorting punch cards or postal letters into 10 mailboxes (0-9)
- *   first by postal code last digit, then by middle digit, then by leading digit.
- * - Time Complexity: O(d * (n + b)) where d = digit count, b = base (10).
- * - Space: O(n + b) auxiliary buffer for stable bucket collation.
- * - Stability: Stable (essential for multi-pass correctness!).
- */
-void radixSortLSD(int* arr, int size, SortMetrics& metrics, bool recordTrace) {
-    metrics.algorithmName = "Radix Sort (LSD)";
-    metrics.arraySize = size;
-    metrics.auxiliaryMemoryBytes = (size * sizeof(int)) + (10 * sizeof(int));
-    metrics.maxRecursionDepth = 0;
-
-    if (size <= 1) {
-        metrics.isCorrect = true;
-        return;
-    }
-
-    // Check for negative numbers: if present, shift by min
-    int minVal = arr[0], maxVal = arr[0];
-    for (int i = 1; i < size; ++i) {
-        if (arr[i] < minVal) minVal = arr[i];
-        if (arr[i] > maxVal) maxVal = arr[i];
-    }
-
-    int offset = 0;
-    if (minVal < 0) {
-        offset = -minVal;
-        for (int i = 0; i < size; ++i) arr[i] += offset;
-        maxVal += offset;
-    }
-
-    // Perform counting sort for every digit position (1s, 10s, 100s, ...)
-    int* output = new int[size];
-    int passNumber = 1;
-
-    for (int exp = 1; maxVal / exp > 0; exp *= 10) {
-        int count[10] = {0};
-
-        if (recordTrace) {
-            std::string placeStr = (exp == 1) ? "units (1s)" : ((exp == 10) ? "tens (10s)" : ((exp == 100) ? "hundreds (100s)" : "exp=" + std::to_string(exp)));
-            metrics.trace.push_back({OP_INFO, exp, -1, passNumber, 2, "Pass " + std::to_string(passNumber) + ": Distributing elements across 0-9 buckets by " + placeStr + " digit.", makeSnapshot(arr, size), "radix_pass"});
-        }
-
-        for (int i = 0; i < size; ++i) {
-            int digit = (arr[i] / exp) % 10;
-            count[digit]++;
-            metrics.moves++;
-            if (recordTrace) {
-                metrics.trace.push_back({OP_COMPARE, i, -1, arr[i] - offset, 4, "Inspecting element " + std::to_string(arr[i] - offset) + ": Extracted digit (" + std::to_string(digit) + ") at exp " + std::to_string(exp) + ".", makeSnapshot(arr, size), ""});
-            }
-        }
-
-        for (int i = 1; i < 10; ++i) count[i] += count[i - 1];
-
-        for (int i = size - 1; i >= 0; --i) {
-            int digit = (arr[i] / exp) % 10;
-            output[count[digit] - 1] = arr[i];
-            count[digit]--;
-            metrics.moves++;
-        }
-
-        for (int i = 0; i < size; ++i) {
-            arr[i] = output[i];
-            metrics.moves++;
-            if (recordTrace) {
-                metrics.trace.push_back({OP_OVERWRITE, i, -1, arr[i] - offset, 6, "Collated bucket value " + std::to_string(arr[i] - offset) + " into array position [" + std::to_string(i) + "].", makeSnapshot(arr, size), ""});
-            }
-        }
-
-        passNumber++;
-    }
-
-    // Restore offset if shifted
-    if (offset != 0) {
-        for (int i = 0; i < size; ++i) arr[i] -= offset;
-    }
-
-    if (recordTrace) {
-        for (int k = 0; k < size; ++k) {
-            metrics.trace.push_back({OP_MARK_SORTED, k, -1, arr[k], 8, "Radix sort (LSD) complete across all digit powers.", makeSnapshot(arr, size), ""});
-        }
-    }
-
-    delete[] output;
-}
-
-// ============================================================================
-// 13. BENCHMARK SUITE RUNNER & DISPATCHER
+// 9. BENCHMARK SUITE RUNNER & DISPATCHER (6 CORE DSA ALGORITHMS)
 // ============================================================================
 
 enum AlgorithmID {
@@ -1416,11 +1036,7 @@ enum AlgorithmID {
     ALGO_QUICK = 2,
     ALGO_HEAP = 3,
     ALGO_ADAPTIVE = 4,
-    ALGO_BUBBLE = 5,
-    ALGO_SELECTION = 6,
-    ALGO_SHELL = 7,
-    ALGO_COUNTING = 8,
-    ALGO_RADIX = 9
+    ALGO_BUBBLE = 5
 };
 
 SortMetrics runSortAlgorithm(int algoId, const int* sourceData, int size, bool recordTrace) {
@@ -1453,18 +1069,6 @@ SortMetrics runSortAlgorithm(int algoId, const int* sourceData, int size, bool r
             break;
         case ALGO_BUBBLE:
             bubbleSort(buffer, size, metrics, recordTrace);
-            break;
-        case ALGO_SELECTION:
-            selectionSort(buffer, size, metrics, recordTrace);
-            break;
-        case ALGO_SHELL:
-            shellSort(buffer, size, metrics, recordTrace);
-            break;
-        case ALGO_COUNTING:
-            countingSort(buffer, size, metrics, recordTrace);
-            break;
-        case ALGO_RADIX:
-            radixSortLSD(buffer, size, metrics, recordTrace);
             break;
         default:
             metrics.algorithmName = "Unknown";
@@ -1588,12 +1192,12 @@ int main() {
     for (int i = 0; i < nDemo; ++i) std::cout << demo[i] << " ";
     std::cout << "\n\n";
 
-    // 2. Testing all 10 algorithms with benchmark metrics
-    std::cout << "[2] Benchmarking All 10 Sorting Algorithms on [45, 12, 89, 3, 27]:\n";
+    // 2. Testing all 6 core algorithms with benchmark metrics
+    std::cout << "[2] Benchmarking All 6 Sorting Algorithms on [45, 12, 89, 3, 27]:\n";
     int testArr[] = {45, 12, 89, 3, 27};
     int size = 5;
 
-    for (int algo = 0; algo < 10; ++algo) {
+    for (int algo = 0; algo < 6; ++algo) {
         SortMetrics m = runSortAlgorithm(algo, testArr, size, true);
         std::cout << "  Algo " << algo << ": " << std::left << std::setw(28) << m.algorithmName
                   << " | Correct: " << (m.isCorrect ? "YES" : "NO")
@@ -1601,7 +1205,7 @@ int main() {
                   << " | Time: " << m.elapsedMicroseconds << "us\n";
     }
 
-    std::cout << "\nAll 10 sorting algorithms verified successfully!\n";
+    std::cout << "\nAll 6 sorting algorithms verified successfully!\n";
     return 0;
 }
 

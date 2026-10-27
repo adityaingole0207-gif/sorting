@@ -178,7 +178,7 @@
               <span class="algo-chip-indicator" style="background-color: transparent;"></span>
             </div>
             <div class="algo-chip" data-algo="2">
-              <span class="algo-chip-name" style="color: var(--algo-quick);">Quick (Med-3)</span>
+              <span class="algo-chip-name" style="color: var(--algo-quick);">Quick</span>
               <span class="algo-chip-indicator" style="background-color: transparent;"></span>
             </div>
             <div class="algo-chip" data-algo="3">
@@ -191,22 +191,6 @@
             </div>
             <div class="algo-chip" data-algo="5">
               <span class="algo-chip-name" style="color: var(--algo-bubble);">Bubble</span>
-              <span class="algo-chip-indicator" style="background-color: transparent;"></span>
-            </div>
-            <div class="algo-chip" data-algo="6">
-              <span class="algo-chip-name" style="color: var(--algo-selection);">Selection</span>
-              <span class="algo-chip-indicator" style="background-color: transparent;"></span>
-            </div>
-            <div class="algo-chip" data-algo="7">
-              <span class="algo-chip-name" style="color: var(--algo-shell);">Shell</span>
-              <span class="algo-chip-indicator" style="background-color: transparent;"></span>
-            </div>
-            <div class="algo-chip" data-algo="8">
-              <span class="algo-chip-name" style="color: var(--algo-counting);">Counting</span>
-              <span class="algo-chip-indicator" style="background-color: transparent;"></span>
-            </div>
-            <div class="algo-chip" data-algo="9">
-              <span class="algo-chip-name" style="color: var(--algo-radix);">Radix (LSD)</span>
               <span class="algo-chip-indicator" style="background-color: transparent;"></span>
             </div>
           </div>
@@ -506,7 +490,6 @@
         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1rem; align-items: center;">
           <span class="mono" style="font-size: 0.78rem; font-weight: 700; color: var(--ink-muted);">RULES ENGINE:</span>
           <button type="button" class="btn btn-sm btn-preset active" id="btnGameRuleBubble">Bubble Sort (Adjacent Swaps)</button>
-          <button type="button" class="btn btn-sm btn-preset" id="btnGameRuleSelection">Selection Sort (Find Min & Place)</button>
           <button type="button" class="btn btn-sm btn-preset" id="btnGameRuleFree">Free Puzzle (Any 2 Tiles)</button>
         </div>
 
@@ -568,14 +551,12 @@
               2. Place Your Bet (Predicted Winner)
             </label>
             <select id="battleChampionSelect" class="text-input-field" style="padding: 0.55rem 0.85rem; font-size: 0.88rem;">
-              <option value="4">Adaptive Sort (Introsort / Run-Merger)</option>
-              <option value="2">Quick Sort (Median-of-Three)</option>
-              <option value="1">Merge Sort (Top-Down)</option>
-              <option value="3">Heap Sort (In-Place)</option>
+              <option value="4">Adaptive Sort</option>
+              <option value="2">Quick Sort</option>
+              <option value="1">Merge Sort</option>
+              <option value="3">Heap Sort</option>
               <option value="0">Insertion Sort</option>
-              <option value="7">Shell Sort (Diminishing Gap)</option>
-              <option value="8">Counting Sort</option>
-              <option value="9">Radix Sort (LSD)</option>
+              <option value="5">Bubble Sort</option>
             </select>
           </div>
         </div>
@@ -646,7 +627,7 @@
         </div>
       </div>
 
-      <!-- Algorithm Study Tabs: All 10 Algorithms -->
+      <!-- Algorithm Study Tabs: 6 Core Algorithms -->
       <div class="learn-algo-tabs" id="learnAlgoTabs">
         <button type="button" class="learn-tab-btn active" data-algo="0">Insertion</button>
         <button type="button" class="learn-tab-btn" data-algo="1">Merge</button>
@@ -654,10 +635,6 @@
         <button type="button" class="learn-tab-btn" data-algo="3">Heap</button>
         <button type="button" class="learn-tab-btn" data-algo="4">Adaptive</button>
         <button type="button" class="learn-tab-btn" data-algo="5">Bubble</button>
-        <button type="button" class="learn-tab-btn" data-algo="6">Selection</button>
-        <button type="button" class="learn-tab-btn" data-algo="7">Shell</button>
-        <button type="button" class="learn-tab-btn" data-algo="8">Counting</button>
-        <button type="button" class="learn-tab-btn" data-algo="9">Radix (LSD)</button>
       </div>
 
       <!-- Dynamic Study Block Container -->
@@ -676,7 +653,7 @@
           <h2 class="section-title">Benchmark Suite &amp; Behavior Matrix</h2>
         </div>
         <div class="section-marginalia">
-          Evaluates all 10 algorithms across Sorted, Reverse, Nearly Sorted, Random, and Duplicate-heavy data,
+          Evaluates all 6 algorithms across Sorted, Reverse, Nearly Sorted, Random, and Duplicate-heavy data,
           with empirical growth curves up to N = 50,000.
         </div>
       </div>
@@ -686,10 +663,10 @@
         <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.65rem; flex-wrap: wrap; gap: 0.5rem;">
           <div>
             <h3 style="font-size: 1.45rem; margin-bottom: 0.2rem;">Theoretical Complexity &amp; Algorithmic Properties</h3>
-            <p style="font-size: 14px; color: var(--ink-muted); margin: 0;">Comprehensive academic reference for all 10 DSA sorting algorithms. Click any column header to sort.</p>
+            <p style="font-size: 14px; color: var(--ink-muted); margin: 0;">Comprehensive academic reference for all 6 DSA sorting algorithms. Click any column header to sort.</p>
           </div>
           <span class="mono" style="font-size: 0.8rem; color: var(--ink-muted); background: var(--paper-subtle); padding: 4px 10px; border-radius: var(--radius-pill); border: 1px solid var(--ink-border);">
-            10 Algorithms &bull; Sticky 1st Col &bull; Sortable
+            6 Algorithms &bull; Sticky 1st Col &bull; Sortable
           </span>
         </div>
         <div class="table-scroll-wrap">
@@ -732,7 +709,7 @@
 
         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
           <button type="button" class="btn btn-sm btn-primary" id="btnRunBenchmarkSuite">
-            <span>&#9654; Run 10-Algorithm Benchmark Suite</span>
+            <span>&#9654; Run 6-Algorithm Benchmark Suite</span>
           </button>
           <button type="button" class="btn btn-sm" id="btnExportCsv">
             <span>&darr; Export CSV</span>
