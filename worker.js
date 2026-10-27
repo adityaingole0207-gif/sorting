@@ -676,13 +676,65 @@ function bubbleSort(arr, metrics, recordTrace) {
 }
 
 // ============================================================================
-// 6. BENCHMARK DISPATCHER & HIGH-PRECISION TIMING (6 CORE ALGORITHMS)
+// 7. SELECTION SORT
+// ============================================================================
+function selectionSort(arr, metrics, recordTrace) {
+    if (!metrics.algorithm) metrics.algorithm = "Selection Sort";
+    metrics.auxiliaryMemoryBytes = 4;
+    const n = arr.length;
+
+    for (let i = 0; i < n - 1; i++) {
+        let minIdx = i;
+        for (let j = i + 1; j < n; j++) {
+            metrics.comparisons++;
+            if (recordTrace) {
+                metrics.trace.push({
+                    type: OP_COMPARE, index1: minIdx, index2: j, value: arr[minIdx], line: 5,
+                    message: `Selection: Comparing current minimum arr[${minIdx}] (${arr[minIdx]}) with arr[${j}] (${arr[j]}).`,
+                    snapshot: cloneArr(arr), meta: ""
+                });
+            }
+            if (arr[j] < arr[minIdx]) minIdx = j;
+        }
+        if (minIdx !== i) {
+            const tmp = arr[i]; arr[i] = arr[minIdx]; arr[minIdx] = tmp;
+            metrics.swaps++;
+            if (recordTrace) {
+                metrics.trace.push({
+                    type: OP_SWAP, index1: i, index2: minIdx, value: arr[i], line: 8,
+                    message: `Swapped unsorted head [${i}] with minimum element ${arr[i]} at [${minIdx}].`,
+                    snapshot: cloneArr(arr), meta: ""
+                });
+            }
+        }
+        if (recordTrace) {
+            metrics.trace.push({
+                type: OP_MARK_SORTED, index1: i, index2: -1, value: arr[i], line: 8,
+                message: `Locked minimum element ${arr[i]} into sorted position [${i}].`,
+                snapshot: cloneArr(arr), meta: ""
+            });
+        }
+    }
+
+    if (recordTrace) {
+        for (let k = 0; k < n; ++k) {
+            metrics.trace.push({
+                type: OP_MARK_SORTED, index1: k, index2: -1, value: arr[k], line: 12,
+                message: "Selection Sort complete. Verified sorted.",
+                snapshot: cloneArr(arr), meta: ""
+            });
+        }
+    }
+}
+
+// ============================================================================
+// 8. BENCHMARK DISPATCHER & HIGH-PRECISION TIMING (7 ALGORITHMS)
 // ============================================================================
 function executeAlgorithm(algoId, rawArray, recordTrace) {
     const arr = new Int32Array(rawArray);
     const n = arr.length;
     const algoNames = [
-        "Insertion Sort", "Merge Sort", "Quick Sort", "Heap Sort", "Adaptive Sort", "Bubble Sort"
+        "Insertion Sort", "Merge Sort", "Quick Sort", "Heap Sort", "Adaptive Sort", "Bubble Sort", "Selection Sort"
     ];
     const metrics = {
         algorithm: algoNames[algoId] || "Algorithm",
@@ -708,6 +760,7 @@ function executeAlgorithm(algoId, rawArray, recordTrace) {
         case 3: heapSort(arr, metrics, recordTrace); break;
         case 4: adaptiveSort(arr, metrics, recordTrace); break;
         case 5: bubbleSort(arr, metrics, recordTrace); break;
+        case 6: selectionSort(arr, metrics, recordTrace); break;
     }
 
     const tEnd = performance.now();

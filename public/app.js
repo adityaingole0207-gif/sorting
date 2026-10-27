@@ -33,7 +33,8 @@
     { id: 2, name: "Quick Sort", color: "#E2461F", best: "O(n log n)", avg: "O(n log n)", worst: "O(n²)", space: "O(log n)", stable: "No", inPlace: "Yes", adaptive: "No", useCase: "General in-memory sorting with optimal CPU cache performance" },
     { id: 3, name: "Heap Sort", color: "#7A3E8E", best: "O(n log n)", avg: "O(n log n)", worst: "O(n log n)", space: "O(1)", stable: "No", inPlace: "Yes", adaptive: "No", useCase: "Strict O(1) auxiliary space with guaranteed O(n log n)" },
     { id: 4, name: "Adaptive Sort", color: "#1F3A5F", best: "O(n)", avg: "O(n log n)", worst: "O(n log n)", space: "O(log n)", stable: "Varies", inPlace: "Yes", adaptive: "Yes", useCase: "Input-sensitive hybrid: early exit on sorted, O(n) reversal on descending" },
-    { id: 5, name: "Bubble Sort", color: "#E11D48", best: "O(n)", avg: "O(n²)", worst: "O(n²)", space: "O(1)", stable: "Yes", inPlace: "Yes", adaptive: "Yes", useCase: "Educational introductory teaching; verifying sortedness" }
+    { id: 5, name: "Bubble Sort", color: "#E11D48", best: "O(n)", avg: "O(n²)", worst: "O(n²)", space: "O(1)", stable: "Yes", inPlace: "Yes", adaptive: "Yes", useCase: "Educational introductory teaching; verifying sortedness" },
+    { id: 6, name: "Selection Sort", color: "#0284C7", best: "O(n²)", avg: "O(n²)", worst: "O(n²)", space: "O(1)", stable: "No", inPlace: "Yes", adaptive: "No", useCase: "Minimizing memory write cycles (EEPROM/Flash)" }
   ];
 
   // --- 1. Algorithm Definitions & Comprehensive Knowledge Base ---
@@ -690,6 +691,104 @@
         "                swap(A[j], A[j + 1])",
         "                swapped = true",
         "        if not swapped: break",
+        "    return A"
+      ]
+    },
+    {
+      id: 6,
+      name: "Selection Sort",
+      shortName: "Selection",
+      color: "#0284C7",
+      bgColor: "#F0F9FF",
+      desc: "Divides the array into sorted prefix and unsorted suffix. Repeatedly finds the minimum element from the unsorted suffix and swaps it with the first unsorted position.",
+      complexityBest: "O(n²)",
+      complexityAvg: "O(n²)",
+      complexityWorst: "O(n²)",
+      space: "O(1) in-place",
+      stable: "No",
+      inPlace: "Yes",
+      analogy: "Scanning a bookshelf for the thinnest book and placing it in slot 1. Then scanning the remaining unsorted shelf for the next thinnest and placing it in slot 2.",
+      workedExample: [
+        { step: "i = 0", text: "Array [45, 12, 89, 3, 27]. Minimum in [0..4] is 3 (at index 3). Swap arr[0] and arr[3] -> [3, 12, 89, 45, 27]." },
+        { step: "i = 1", text: "Unsorted [12, 89, 45, 27]. Minimum is 12 (at index 1). Swap arr[1] with arr[1] (no-op) -> [3, 12, 89, 45, 27]." },
+        { step: "i = 2", text: "Unsorted [89, 45, 27]. Minimum is 27 (at index 4). Swap arr[2] and arr[4] -> [3, 12, 27, 45, 89]." },
+        { step: "i = 3", text: "Unsorted [45, 89]. Minimum is 45 (at index 3). Swap arr[3] with arr[3] -> [3, 12, 27, 45, 89]. Sorted!" }
+      ],
+      pros: [
+        "Minimal memory writes: performs at most n - 1 swaps in all cases",
+        "Strictly in-place with O(1) auxiliary memory",
+        "Simple implementation without recursive stack overhead",
+        "Ideal when write operations to memory are significantly expensive (e.g. Flash/EEPROM)"
+      ],
+      cons: [
+        "Performs O(n²) comparisons in ALL cases, even when the input is already sorted",
+        "Unstable: can change relative order of identical elements",
+        "Does not adapt to existing presorted runs"
+      ],
+      whenToUse: "Systems with expensive write cycles (like Flash EEPROM memory) where minimizing memory writes to O(n) is critical.",
+      vivaQA: [
+        {
+          q: "Why does Selection Sort perform O(n²) comparisons even on a sorted array?",
+          a: "Because the inner loop must scan the entire remaining unsorted suffix arr[i .. n-1] to confirm that no smaller element exists, totaling (n - 1) + (n - 2) + ... + 1 = n(n - 1) / 2 comparisons unconditionally."
+        },
+        {
+          q: "What is the primary advantage of Selection Sort over Bubble and Insertion Sort?",
+          a: "Selection Sort performs at most (n - 1) memory writes (swaps). Bubble and Insertion sort can perform up to O(n²) writes or element shifts."
+        },
+        {
+          q: "Why is standard Selection Sort not stable?",
+          a: "A long-range swap can move the selected minimum element past equal elements. For example, sorting [4a, 4b, 2] swaps 4a with 2, resulting in [2, 4b, 4a], reversing 4a and 4b."
+        },
+        {
+          q: "What is the formal loop invariant for Selection Sort?",
+          a: "At the start of outer loop iteration i, subarray arr[0 .. i - 1] contains the smallest i elements of the entire array in sorted order, and no element in arr[i .. n - 1] is smaller than any element in arr[0 .. i - 1]."
+        }
+      ],
+      quiz: [
+        {
+          q: "How many memory swaps does Selection Sort perform in the worst case?",
+          options: ["n(n - 1) / 2", "At most n - 1", "n log n", "0"],
+          correct: 1,
+          exp: "Correct! Selection Sort performs at most one swap per outer loop iteration, totaling at most n - 1 swaps."
+        },
+        {
+          q: "Why is Selection Sort advantageous for EEPROM / Flash memory architectures?",
+          options: ["It uses the least RAM", "It minimizes memory write cycles, preserving flash wear life", "It runs in O(n) time", "It uses no comparisons"],
+          correct: 1,
+          exp: "Correct! Flash memory has limited write endurance. Selection Sort's O(n) write bound minimizes write wear."
+        },
+        {
+          q: "What is the best-case time complexity of standard Selection Sort?",
+          options: ["O(n)", "O(n log n)", "O(n²)", "O(1)"],
+          correct: 2,
+          exp: "Correct! Selection Sort always scans the full remaining suffix, making O(n²) comparisons regardless of initial input order."
+        }
+      ],
+      cppCode: [
+        "class SelectionSort {",
+        "public:",
+        "    static void swap(int &a, int &b) {",
+        "        int temp = a; a = b; b = temp;",
+        "    }",
+        "    static void sort(int arr[], int n) {",
+        "        for (int i = 0; i < n - 1; i++) {",
+        "            int minIdx = i;",
+        "            for (int j = i + 1; j < n; j++) {",
+        "                if (arr[j] < arr[minIdx])",
+        "                    minIdx = j;",
+        "            }",
+        "            if (minIdx != i) swap(arr[i], arr[minIdx]);",
+        "        }",
+        "    }",
+        "};"
+      ],
+      pseudoCode: [
+        "algorithm SelectionSort(A, n):",
+        "    for i from 0 to n - 2:",
+        "        minIdx = i",
+        "        for j from i + 1 to n - 1:",
+        "            if A[j] < A[minIdx]: minIdx = j",
+        "        if minIdx != i: swap(A[i], A[minIdx])",
         "    return A"
       ]
     }
@@ -2921,6 +3020,40 @@
         }
         if (!swapped) break;
       }
+    } else if (algoId === 6) { // Selection Sort
+      auxBytes = 4;
+      for (let i = 0; i < n - 1; i++) {
+        let minIdx = i;
+        for (let j = i + 1; j < n; j++) {
+          comparisons++;
+          if (recordTrace) {
+            trace.push({
+              type: OP_COMPARE, index1: minIdx, index2: j, value: arr[minIdx], line: 5,
+              message: `Selection: Comparing current minimum arr[${minIdx}] (${arr[minIdx]}) with arr[${j}] (${arr[j]}).`,
+              snapshot: Array.from(arr), meta: ""
+            });
+          }
+          if (arr[j] < arr[minIdx]) minIdx = j;
+        }
+        if (minIdx !== i) {
+          const tmp = arr[i]; arr[i] = arr[minIdx]; arr[minIdx] = tmp;
+          swaps++;
+          if (recordTrace) {
+            trace.push({
+              type: OP_SWAP, index1: i, index2: minIdx, value: arr[i], line: 8,
+              message: `Swapped unsorted head [${i}] with minimum element ${arr[i]} at [${minIdx}].`,
+              snapshot: Array.from(arr), meta: ""
+            });
+          }
+        }
+        if (recordTrace) {
+          trace.push({
+            type: OP_MARK_SORTED, index1: i, index2: -1, value: arr[i], line: 8,
+            message: `Locked minimum element ${arr[i]} into sorted position [${i}].`,
+            snapshot: Array.from(arr), meta: ""
+          });
+        }
+      }
     }
 
     const tEnd = performance.now();
@@ -3014,6 +3147,8 @@
       inv = "Adaptive Guard: Dispatches minimal asymptotic strategy based on inversions and size.";
     } else if (algoId === 5) {
       inv = `Bubble Invariant: Suffix arr[n-${step.index1 || 1} .. n-1] holds the largest elements in final order.`;
+    } else if (algoId === 6) {
+      inv = `Selection Invariant: arr[0 .. ${Math.max(0, step.index1 - 1)}] holds the smallest elements in final position.`;
     }
 
     if (invariantEl) invariantEl.textContent = inv;
