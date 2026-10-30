@@ -25,22 +25,222 @@
   };
 
   // ==========================================================================
-  // STATIC THEORY COMPARISON DATA (6 CORE DSA SORTING ALGORITHMS)
+  // STATIC THEORY COMPARISON DATA (5 CORE DSA SORTING ALGORITHMS)
   // ==========================================================================
   const THEORY_DATA = [
-    { id: 0, name: "Insertion Sort", color: "#D98200", best: "O(n)", avg: "O(n²)", worst: "O(n²)", space: "O(1)", stable: "Yes", inPlace: "Yes", adaptive: "Yes", useCase: "Small datasets (N < 16) or nearly-sorted data" },
-    { id: 1, name: "Merge Sort", color: "#0E7C6F", best: "O(n log n)", avg: "O(n log n)", worst: "O(n log n)", space: "O(n)", stable: "Yes", inPlace: "No", adaptive: "No", useCase: "Guaranteed O(n log n) & stability; linked lists" },
-    { id: 2, name: "Quick Sort", color: "#E2461F", best: "O(n log n)", avg: "O(n log n)", worst: "O(n²)", space: "O(log n)", stable: "No", inPlace: "Yes", adaptive: "No", useCase: "General in-memory sorting with optimal CPU cache performance" },
-    { id: 3, name: "Heap Sort", color: "#7A3E8E", best: "O(n log n)", avg: "O(n log n)", worst: "O(n log n)", space: "O(1)", stable: "No", inPlace: "Yes", adaptive: "No", useCase: "Strict O(1) auxiliary space with guaranteed O(n log n)" },
-    { id: 4, name: "Adaptive Sort", color: "#1F3A5F", best: "O(n)", avg: "O(n log n)", worst: "O(n log n)", space: "O(log n)", stable: "Varies", inPlace: "Yes", adaptive: "Yes", useCase: "Input-sensitive hybrid: early exit on sorted, O(n) reversal on descending" },
-    { id: 5, name: "Bubble Sort", color: "#E11D48", best: "O(n)", avg: "O(n²)", worst: "O(n²)", space: "O(1)", stable: "Yes", inPlace: "Yes", adaptive: "Yes", useCase: "Educational introductory teaching; verifying sortedness" },
-    { id: 6, name: "Selection Sort", color: "#0284C7", best: "O(n²)", avg: "O(n²)", worst: "O(n²)", space: "O(1)", stable: "No", inPlace: "Yes", adaptive: "No", useCase: "Minimizing memory write cycles (EEPROM/Flash)" }
+    { id: 0, name: "Bubble Sort", color: "#E11D48", best: "O(n)", avg: "O(n²)", worst: "O(n²)", space: "O(1)", stable: "Yes", inPlace: "Yes", adaptive: "Yes", useCase: "Educational introductory teaching; verifying sortedness" },
+    { id: 1, name: "Selection Sort", color: "#0284C7", best: "O(n²)", avg: "O(n²)", worst: "O(n²)", space: "O(1)", stable: "No", inPlace: "Yes", adaptive: "No", useCase: "Minimizing memory write cycles (EEPROM/Flash)" },
+    { id: 2, name: "Insertion Sort", color: "#D98200", best: "O(n)", avg: "O(n²)", worst: "O(n²)", space: "O(1)", stable: "Yes", inPlace: "Yes", adaptive: "Yes", useCase: "Small datasets (N < 16) or nearly-sorted data" },
+    { id: 3, name: "Merge Sort", color: "#0E7C6F", best: "O(n log n)", avg: "O(n log n)", worst: "O(n log n)", space: "O(n)", stable: "Yes", inPlace: "No", adaptive: "No", useCase: "Guaranteed O(n log n) & stability; linked lists" },
+    { id: 4, name: "Quick Sort", color: "#E2461F", best: "O(n log n)", avg: "O(n log n)", worst: "O(n²)", space: "O(log n)", stable: "No", inPlace: "Yes", adaptive: "No", useCase: "General in-memory sorting with optimal CPU cache performance" }
   ];
 
   // --- 1. Algorithm Definitions & Comprehensive Knowledge Base ---
   const ALGORITHMS = [
     {
       id: 0,
+      name: "Bubble Sort",
+      shortName: "Bubble",
+      color: "#E11D48",
+      bgColor: "#FFF1F2",
+      desc: "Repeatedly steps through the list, compares adjacent elements and swaps them if they are in the wrong order. Passes continue until no swaps are needed.",
+      complexityBest: "O(n)",
+      complexityAvg: "O(n²)",
+      complexityWorst: "O(n²)",
+      space: "O(1) in-place",
+      stable: "Yes",
+      inPlace: "Yes",
+      analogy: "Bubbles rising in water. The largest air bubbles (largest numbers) rise to the surface (end of the array) first in each pass.",
+      workedExample: [
+        { step: "Pass 1", text: "Compare [45, 12] -> swap to [12, 45]. Compare [45, 89] -> ok. Compare [89, 3] -> swap to [3, 89]. Compare [89, 27] -> swap to [27, 89]. Array: [12, 45, 3, 27, 89]. Max 89 locked at end." },
+        { step: "Pass 2", text: "Compare [12, 45] -> ok. Compare [45, 3] -> swap to [3, 45]. Compare [45, 27] -> swap to [27, 45]. Array: [12, 3, 27, 45, 89]. 45 locked at index 3." },
+        { step: "Pass 3", text: "Compare [12, 3] -> swap to [3, 12]. Compare [12, 27] -> ok. Array: [3, 12, 27, 45, 89]. 27 locked." },
+        { step: "Pass 4", text: "Compare [3, 12] -> ok. No swaps executed in entire pass; early exit flag triggered! Array verified sorted." }
+      ],
+      pros: [
+        "Conceptually straightforward and easy to implement",
+        "O(n) linear best case when optimized with a swapped flag",
+        "Stable sort: never disrupts relative ordering of equal keys",
+        "Strictly in-place with O(1) auxiliary space"
+      ],
+      cons: [
+        "O(n²) worst and average case runtime on random or reverse sequences",
+        "Performs far more writes and swaps than Insertion Sort",
+        "Impractical for large datasets"
+      ],
+      whenToUse: "Introductory teaching of sorting concepts, or verifying whether a list is already sorted in a single pass.",
+      vivaQA: [
+        {
+          q: "How does the swapped boolean flag optimize Bubble Sort?",
+          a: "If an entire pass completes without a single swap occurring, all adjacent pairs are in ascending order. The flag terminates the outer loop immediately, achieving O(n) best-case time instead of O(n²)."
+        },
+        {
+          q: "What is the formal loop invariant for Bubble Sort?",
+          a: "After iteration i of the outer loop (0 <= i < n), the subarray arr[n-i .. n-1] contains the i largest elements of the original array in strictly sorted ascending order."
+        },
+        {
+          q: "Why is Bubble Sort considered stable?",
+          a: "Adjacent elements are swapped only when arr[j] > arr[j+1]. Equal elements (arr[j] == arr[j+1]) never satisfy the condition, preserving their original relative sequence."
+        },
+        {
+          q: "What is the maximum number of comparisons and swaps in Bubble Sort?",
+          a: "Comparisons: exactly n(n - 1) / 2 in the unoptimized version. Swaps: exactly equal to the total number of inversions in the input array, up to n(n - 1) / 2 in reverse-sorted data."
+        }
+      ],
+      quiz: [
+        {
+          q: "What triggers an early termination in optimized Bubble Sort?",
+          options: ["Reaching the middle of the array", "A complete pass with zero swaps performed", "Finding a duplicate element", "After exactly 3 iterations"],
+          correct: 1,
+          exp: "Correct! If an entire inner loop pass makes 0 swaps, all adjacent pairs are ordered, proving the array is sorted."
+        },
+        {
+          q: "Is Bubble Sort a stable sorting algorithm?",
+          options: ["Yes, equal elements are never swapped", "No, it swaps across arbitrary distances", "Only for arrays of even length", "Only when using a flag"],
+          correct: 0,
+          exp: "Correct! The condition arr[j] > arr[j+1] strictly requires a strictly greater element to trigger a swap, keeping equal keys stable."
+        },
+        {
+          q: "What is the worst-case number of swaps for Bubble Sort on an array of size n?",
+          options: ["n", "n log n", "n(n - 1) / 2", "2^n"],
+          correct: 2,
+          exp: "Correct! On a strictly reverse-sorted array, every pair of elements forms an inversion, requiring n(n-1)/2 swaps."
+        }
+      ],
+      cppCode: [
+        "class BubbleSort {",
+        "public:",
+        "    static void swap(int &a, int &b) {",
+        "        int temp = a; a = b; b = temp;",
+        "    }",
+        "    static void sort(int arr[], int n) {",
+        "        for (int i = 0; i < n - 1; i++) {",
+        "            bool swapped = false;",
+        "            for (int j = 0; j < n - i - 1; j++) {",
+        "                if (arr[j] > arr[j + 1]) {",
+        "                    swap(arr[j], arr[j + 1]);",
+        "                    swapped = true;",
+        "                }",
+        "            }",
+        "            if (!swapped) break;",
+        "        }",
+        "    }",
+        "};"
+      ],
+      pseudoCode: [
+        "algorithm BubbleSort(A, n):",
+        "    for i from 0 to n - 2:",
+        "        swapped = false",
+        "        for j from 0 to n - i - 2:",
+        "            if A[j] > A[j + 1]:",
+        "                swap(A[j], A[j + 1])",
+        "                swapped = true",
+        "        if not swapped: break",
+        "    return A"
+      ]
+    },
+,
+    {
+      id: 1,
+      name: "Selection Sort",
+      shortName: "Selection",
+      color: "#0284C7",
+      bgColor: "#F0F9FF",
+      desc: "Divides the array into sorted prefix and unsorted suffix. Repeatedly finds the minimum element from the unsorted suffix and swaps it with the first unsorted position.",
+      complexityBest: "O(n²)",
+      complexityAvg: "O(n²)",
+      complexityWorst: "O(n²)",
+      space: "O(1) in-place",
+      stable: "No",
+      inPlace: "Yes",
+      analogy: "Scanning a bookshelf for the thinnest book and placing it in slot 1. Then scanning the remaining unsorted shelf for the next thinnest and placing it in slot 2.",
+      workedExample: [
+        { step: "i = 0", text: "Array [45, 12, 89, 3, 27]. Minimum in [0..4] is 3 (at index 3). Swap arr[0] and arr[3] -> [3, 12, 89, 45, 27]." },
+        { step: "i = 1", text: "Unsorted [12, 89, 45, 27]. Minimum is 12 (at index 1). Swap arr[1] with arr[1] (no-op) -> [3, 12, 89, 45, 27]." },
+        { step: "i = 2", text: "Unsorted [89, 45, 27]. Minimum is 27 (at index 4). Swap arr[2] and arr[4] -> [3, 12, 27, 45, 89]." },
+        { step: "i = 3", text: "Unsorted [45, 89]. Minimum is 45 (at index 3). Swap arr[3] with arr[3] -> [3, 12, 27, 45, 89]. Sorted!" }
+      ],
+      pros: [
+        "Minimal memory writes: performs at most n - 1 swaps in all cases",
+        "Strictly in-place with O(1) auxiliary memory",
+        "Simple implementation without recursive stack overhead",
+        "Ideal when write operations to memory are significantly expensive (e.g. Flash/EEPROM)"
+      ],
+      cons: [
+        "Performs O(n²) comparisons in ALL cases, even when the input is already sorted",
+        "Unstable: can change relative order of identical elements",
+        "Does not adapt to existing presorted runs"
+      ],
+      whenToUse: "Systems with expensive write cycles (like Flash EEPROM memory) where minimizing memory writes to O(n) is critical.",
+      vivaQA: [
+        {
+          q: "Why does Selection Sort perform O(n²) comparisons even on a sorted array?",
+          a: "Because the inner loop must scan the entire remaining unsorted suffix arr[i .. n-1] to confirm that no smaller element exists, totaling (n - 1) + (n - 2) + ... + 1 = n(n - 1) / 2 comparisons unconditionally."
+        },
+        {
+          q: "What is the primary advantage of Selection Sort over Bubble and Insertion Sort?",
+          a: "Selection Sort performs at most (n - 1) memory writes (swaps). Bubble and Insertion sort can perform up to O(n²) writes or element shifts."
+        },
+        {
+          q: "Why is standard Selection Sort not stable?",
+          a: "A long-range swap can move the selected minimum element past equal elements. For example, sorting [4a, 4b, 2] swaps 4a with 2, resulting in [2, 4b, 4a], reversing 4a and 4b."
+        },
+        {
+          q: "What is the formal loop invariant for Selection Sort?",
+          a: "At the start of outer loop iteration i, subarray arr[0 .. i - 1] contains the smallest i elements of the entire array in sorted order, and no element in arr[i .. n - 1] is smaller than any element in arr[0 .. i - 1]."
+        }
+      ],
+      quiz: [
+        {
+          q: "How many memory swaps does Selection Sort perform in the worst case?",
+          options: ["n(n - 1) / 2", "At most n - 1", "n log n", "0"],
+          correct: 1,
+          exp: "Correct! Selection Sort performs at most one swap per outer loop iteration, totaling at most n - 1 swaps."
+        },
+        {
+          q: "Why is Selection Sort advantageous for EEPROM / Flash memory architectures?",
+          options: ["It uses the least RAM", "It minimizes memory write cycles, preserving flash wear life", "It runs in O(n) time", "It uses no comparisons"],
+          correct: 1,
+          exp: "Correct! Flash memory has limited write endurance. Selection Sort's O(n) write bound minimizes write wear."
+        },
+        {
+          q: "What is the best-case time complexity of standard Selection Sort?",
+          options: ["O(n)", "O(n log n)", "O(n²)", "O(1)"],
+          correct: 2,
+          exp: "Correct! Selection Sort always scans the full remaining suffix, making O(n²) comparisons regardless of initial input order."
+        }
+      ],
+      cppCode: [
+        "class SelectionSort {",
+        "public:",
+        "    static void swap(int &a, int &b) {",
+        "        int temp = a; a = b; b = temp;",
+        "    }",
+        "    static void sort(int arr[], int n) {",
+        "        for (int i = 0; i < n - 1; i++) {",
+        "            int minIdx = i;",
+        "            for (int j = i + 1; j < n; j++) {",
+        "                if (arr[j] < arr[minIdx])",
+        "                    minIdx = j;",
+        "            }",
+        "            if (minIdx != i) swap(arr[i], arr[minIdx]);",
+        "        }",
+        "    }",
+        "};"
+      ],
+      pseudoCode: [
+        "algorithm SelectionSort(A, n):",
+        "    for i from 0 to n - 2:",
+        "        minIdx = i",
+        "        for j from i + 1 to n - 1:",
+        "            if A[j] < A[minIdx]: minIdx = j",
+        "        if minIdx != i: swap(A[i], A[minIdx])",
+        "    return A"
+      ]
+    }
+,
+    {
+      id: 2,
       name: "Insertion Sort",
       shortName: "Insertion",
       color: "#E8A317",
@@ -137,8 +337,9 @@
         "    return A"
       ]
     },
+,
     {
-      id: 1,
+      id: 3,
       name: "Merge Sort",
       shortName: "Merge",
       color: "#138A7E",
@@ -251,8 +452,9 @@
         "    copy temp back to A[left..right]"
       ]
     },
+,
     {
-      id: 2,
+      id: 4,
       name: "Quick Sort (Med-3)",
       shortName: "Quick",
       color: "#E2461F",
@@ -363,433 +565,6 @@
         "        if A[j] < pivot: i++, swap A[i] with A[j]",
         "    swap A[i + 1] with A[high]",
         "    return i + 1"
-      ]
-    },
-    {
-      id: 3,
-      name: "Heap Sort",
-      shortName: "Heap",
-      color: "#7A3E8E",
-      bgColor: "#F6EDF8",
-      desc: "Transforms the array in-place into a binary max-heap in O(n) time, then repeatedly extracts the root maximum to the end.",
-      complexityBest: "O(n log n)",
-      complexityAvg: "O(n log n)",
-      complexityWorst: "O(n log n)",
-      space: "O(1) in-place",
-      stable: "No",
-      inPlace: "Yes",
-      analogy: "A corporate tournament pyramid. The top performer rises to the CEO position (root of max-heap), steps down to the hall of fame (end of the array), and the remaining contenders battle to find the next champion.",
-      workedExample: [
-        { step: "Initial Array", text: "[45, 12, 89, 3, 27]. Viewed as binary tree: Root=45, Children=(12, 89), Grandchildren=(3, 27)." },
-        { step: "Build Max-Heap", text: "Bottom-up heapify from index n/2-1 down to 0. 89 is largest; root becomes 89. Max-heap: [89, 27, 45, 3, 12]." },
-        { step: "Extract 1", text: "Swap root 89 with end 12 -> [12, 27, 45, 3 | 89]. SiftDown root 12 -> [45, 27, 12, 3 | 89]." },
-        { step: "Extract 2", text: "Swap root 45 with end 3 -> [3, 27, 12 | 45, 89]. SiftDown root 3 -> [27, 3, 12 | 45, 89]." },
-        { step: "Remaining", text: "Extract 27, then 12. Final sorted array: [3, 12, 27, 45, 89]." }
-      ],
-      pros: [
-        "Guaranteed O(n log n) in all cases (never degrades to O(n²))",
-        "Strictly in-place with O(1) auxiliary memory (no heap buffers)",
-        "Predictable memory footprint with zero extra heap allocations"
-      ],
-      cons: [
-        "Unstable sort",
-        "Poor CPU cache locality compared to QuickSort because parent/child indices jump across memory"
-      ],
-      whenToUse: "Systems with critical memory limitations (embedded hardware, safety-critical real-time OS) where O(n log n) must be guaranteed without extra RAM.",
-      vivaQA: [
-        {
-          q: "Why is building a binary heap O(n) and not O(n log n)?",
-          a: "Bottom-up heap construction starts at the lowest internal nodes. Most nodes are near the leaves where tree height h is small. The summation sum(h / 2^h) converges to <= 2, bounding total operations to O(n)."
-        },
-        {
-          q: "What are the parent and child index formulas in a 0-indexed binary heap?",
-          a: "For node at index i: Left child = 2i + 1, Right child = 2i + 2, Parent = floor((i - 1) / 2)."
-        },
-        {
-          q: "Why does Quick Sort usually run faster than Heap Sort in practice?",
-          a: "Quick Sort accesses elements sequentially with high spatial locality, keeping cache lines hot. Heap Sort jumps between i, 2i+1, and 2i+2, causing frequent CPU L1/L2 cache misses."
-        },
-        {
-          q: "Is Heap Sort stable?",
-          a: "No. Swapping the root with the last element of the heap relocates items across large distances, breaking original relative order."
-        }
-      ],
-      quiz: [
-        {
-          q: "What is the time complexity to build a binary max-heap of size N from an arbitrary array?",
-          options: ["O(log n)", "O(n)", "O(n log n)", "O(n²)"],
-          correct: 1,
-          exp: "Correct! Bottom-up heapify runs in linear O(n) time, proven by the geometric summation of node heights."
-        },
-        {
-          q: "In an array representation of a binary heap, where is the left child of node at index i?",
-          options: ["2i", "2i + 1", "2i + 2", "i / 2"],
-          correct: 1,
-          exp: "Correct! In 0-indexed arrays, the left child is at index 2i + 1 and right child is at 2i + 2."
-        },
-        {
-          q: "What is the auxiliary memory consumption of Heap Sort?",
-          options: ["O(1) in-place", "O(log n) call stack", "O(n) auxiliary array", "O(n log n)"],
-          correct: 0,
-          exp: "Correct! Heap Sort is strictly in-place, operating on the existing array with zero auxiliary memory allocations."
-        }
-      ],
-      cppCode: [
-        "class HeapSort {",
-        "public:",
-        "    static void swap(int &a, int &b) {",
-        "        int temp = a; a = b; b = temp;",
-        "    }",
-        "    static void heapify(int arr[], int n, int i) {",
-        "        int largest = i, left = 2 * i + 1, right = 2 * i + 2;",
-        "        if (left < n && arr[left] > arr[largest]) largest = left;",
-        "        if (right < n && arr[right] > arr[largest]) largest = right;",
-        "        if (largest != i) {",
-        "            swap(arr[i], arr[largest]);",
-        "            heapify(arr, n, largest);",
-        "        }",
-        "    }",
-        "    static void sort(int arr[], int n) {",
-        "        for (int i = n / 2 - 1; i >= 0; i--)",
-        "            heapify(arr, n, i);",
-        "        for (int i = n - 1; i > 0; i--) {",
-        "            swap(arr[0], arr[i]);",
-        "            heapify(arr, i, 0);",
-        "        }",
-        "    }",
-        "};"
-      ],
-      pseudoCode: [
-        "algorithm HeapSort(A, n):",
-        "    // Build max-heap",
-        "    for i from floor(n/2) - 1 down to 0:",
-        "        SiftDown(A, i, n)",
-        "    // Extract root repeatedly",
-        "    for end from n - 1 down to 1:",
-        "        swap(A[0], A[end])",
-        "        SiftDown(A, 0, end)",
-        "",
-        "algorithm SiftDown(A, root, size):",
-        "    largest = root, l = 2*root + 1, r = 2*root + 2",
-        "    if l < size and A[l] > A[largest]: largest = l",
-        "    if r < size and A[r] > A[largest]: largest = r",
-        "    if largest != root:",
-        "        swap(A[root], A[largest])",
-        "        SiftDown(A, largest, size)"
-      ]
-    },
-    {
-      id: 4,
-      name: "Adaptive Sort",
-      shortName: "Adaptive",
-      color: "#1F3A5F",
-      bgColor: "#EDF2F8",
-      desc: "Profiles the input array structure (sortedness, runs, inversions, magnitude) and dispatches the optimal sorting strategy (Reversal, Run Insertion, or Introsort).",
-      complexityBest: "O(n)",
-      complexityAvg: "O(n log n)",
-      complexityWorst: "O(n log n)",
-      space: "O(log n) stack",
-      stable: "Varies",
-      inPlace: "Yes",
-      analogy: "A smart GPS navigation system. If you are already on an open highway, it keeps you cruising (presorted O(n)). If you are going backwards, it takes a clean U-turn (reversal). In city traffic, it blends highways with local detours (Introsort).",
-      workedExample: [
-        { step: "Profiling", text: "Array [45, 12, 89, 3, 27]: N=5, sorted runs=3, inversions=4. Dispatches Insertion Sort (N < 16)." },
-        { step: "Reverse Profile", text: "Given [50, 40, 30, 20, 10]: Detects monotone descending sequence. Performs in-place symmetric reversal in 2 swaps, 0 comparisons!" },
-        { step: "Large Random", text: "Given N=1000 random: Dispatches Introsort (QuickSort with depth guard cutoff at 2*floor(log2(N)) = 18 and Insertion cutoff < 16)." }
-      ],
-      pros: [
-        "Optimal O(n) runtime on presorted and reverse-sorted data",
-        "Eliminates QuickSort's O(n²) worst-case via Introsort HeapSort depth guard",
-        "Eliminates recursive call overhead on small partitions (< 16 elements)"
-      ],
-      cons: [
-        "Small profiling inspection pass overhead (O(n) sampling)",
-        "More complex implementation logic"
-      ],
-      whenToUse: "The standard algorithm of modern standard libraries (e.g. C++ std::sort uses Introsort; Python and Java use Timsort).",
-      vivaQA: [
-        {
-          q: "What is Introsort?",
-          a: "Introspective Sort begins with Quick Sort for optimal cache performance. It tracks recursion depth; if depth reaches 2*floor(log2(n)), it switches to Heap Sort to guarantee an O(n log n) upper bound."
-        },
-        {
-          q: "Why does Adaptive Sort switch to Insertion Sort for subproblems < 16?",
-          a: "For tiny arrays, function call frames, pointer arithmetic, and partitioning overhead exceed the execution time of simple sequential shifting in Insertion Sort."
-        },
-        {
-          q: "How does Adaptive Sort handle strictly reverse-sorted arrays?",
-          a: "It identifies monotonic non-increasing ordering during profiling and inverts the array in-place using floor(n/2) symmetric swaps with zero element comparisons."
-        },
-        {
-          q: "What real-world languages use adaptive hybrid sorting?",
-          a: "C++ STL uses Introsort (QuickSort + HeapSort + InsertionSort). Python, Java, Android, and Rust use Timsort (MergeSort + InsertionSort)."
-        }
-      ],
-      quiz: [
-        {
-          q: "When does Introsort switch from QuickSort to HeapSort?",
-          options: ["When the array size is less than 16", "When recursion depth exceeds 2 * floor(log2 n)", "When duplicate elements are found", "Never"],
-          correct: 1,
-          exp: "Correct! If the recursion tree grows deeper than 2*floor(log2 n), it indicates degenerate partitioning, so it switches to HeapSort to prevent O(n²)."
-        },
-        {
-          q: "What is the time complexity of Adaptive Sort on a strictly reverse-sorted array?",
-          options: ["O(n²)", "O(n log n)", "O(n)", "O(1)"],
-          correct: 2,
-          exp: "Correct! It detects the descending monotone order and applies in-place reversal in floor(n/2) swaps and zero comparisons (O(n) linear)."
-        },
-        {
-          q: "Why does Adaptive Sort check for small arrays (N < 16)?",
-          options: ["Because QuickSort crashes on small arrays", "Because Insertion Sort has lower constant factor overhead on small arrays", "Because HeapSort cannot build heaps smaller than 16", "To save memory"],
-          correct: 1,
-          exp: "Correct! For small N, the cache-friendly sequential shifts of Insertion Sort beat recursive call-frame overhead."
-        }
-      ],
-      cppCode: [
-        "class AdaptiveSort {",
-        "public:",
-        "    static void swap(int &a, int &b) {",
-        "        int temp = a; a = b; b = temp;",
-        "    }",
-        "    static void insertionSort(int arr[], int n) {",
-        "        for (int i = 1; i < n; i++) {",
-        "            int key = arr[i], j = i - 1;",
-        "            while (j >= 0 && arr[j] > key) {",
-        "                arr[j + 1] = arr[j];",
-        "                j--;",
-        "            }",
-        "            arr[j + 1] = key;",
-        "        }",
-        "    }",
-        "    static void sort(int arr[], int n) {",
-        "        if (n <= 1) return;",
-        "        bool isSorted = true;",
-        "        for (int i = 0; i < n - 1; i++) {",
-        "            if (arr[i] > arr[i + 1]) { isSorted = false; break; }",
-        "        }",
-        "        if (isSorted) return;",
-        "        bool isReverse = true;",
-        "        for (int i = 0; i < n - 1; i++) {",
-        "            if (arr[i] < arr[i + 1]) { isReverse = false; break; }",
-        "        }",
-        "        if (isReverse) {",
-        "            int i = 0, j = n - 1;",
-        "            while (i < j) { swap(arr[i], arr[j]); i++; j--; }",
-        "            return;",
-        "        }",
-        "        insertionSort(arr, n);",
-        "    }",
-        "};"
-      ],
-      pseudoCode: [
-        "algorithm AdaptiveSort(A, n):",
-        "    if n <= 1: return",
-        "    if IsSorted(A, n): return",
-        "    if IsReverseSorted(A, n):",
-        "        ReverseInPlace(A, n)",
-        "        return",
-        "    if n < 16: InsertionSort(A, n)",
-        "    else: QuickSort(A, 0, n - 1)"
-      ]
-    },
-    {
-      id: 5,
-      name: "Bubble Sort",
-      shortName: "Bubble",
-      color: "#E11D48",
-      bgColor: "#FFF1F2",
-      desc: "Repeatedly steps through the list, compares adjacent elements and swaps them if they are in the wrong order. Passes continue until no swaps are needed.",
-      complexityBest: "O(n)",
-      complexityAvg: "O(n²)",
-      complexityWorst: "O(n²)",
-      space: "O(1) in-place",
-      stable: "Yes",
-      inPlace: "Yes",
-      analogy: "Bubbles rising in water. The largest air bubbles (largest numbers) rise to the surface (end of the array) first in each pass.",
-      workedExample: [
-        { step: "Pass 1", text: "Compare [45, 12] -> swap to [12, 45]. Compare [45, 89] -> ok. Compare [89, 3] -> swap to [3, 89]. Compare [89, 27] -> swap to [27, 89]. Array: [12, 45, 3, 27, 89]. Max 89 locked at end." },
-        { step: "Pass 2", text: "Compare [12, 45] -> ok. Compare [45, 3] -> swap to [3, 45]. Compare [45, 27] -> swap to [27, 45]. Array: [12, 3, 27, 45, 89]. 45 locked at index 3." },
-        { step: "Pass 3", text: "Compare [12, 3] -> swap to [3, 12]. Compare [12, 27] -> ok. Array: [3, 12, 27, 45, 89]. 27 locked." },
-        { step: "Pass 4", text: "Compare [3, 12] -> ok. No swaps executed in entire pass; early exit flag triggered! Array verified sorted." }
-      ],
-      pros: [
-        "Conceptually straightforward and easy to implement",
-        "O(n) linear best case when optimized with a swapped flag",
-        "Stable sort: never disrupts relative ordering of equal keys",
-        "Strictly in-place with O(1) auxiliary space"
-      ],
-      cons: [
-        "O(n²) worst and average case runtime on random or reverse sequences",
-        "Performs far more writes and swaps than Insertion Sort",
-        "Impractical for large datasets"
-      ],
-      whenToUse: "Introductory teaching of sorting concepts, or verifying whether a list is already sorted in a single pass.",
-      vivaQA: [
-        {
-          q: "How does the swapped boolean flag optimize Bubble Sort?",
-          a: "If an entire pass completes without a single swap occurring, all adjacent pairs are in ascending order. The flag terminates the outer loop immediately, achieving O(n) best-case time instead of O(n²)."
-        },
-        {
-          q: "What is the formal loop invariant for Bubble Sort?",
-          a: "After iteration i of the outer loop (0 <= i < n), the subarray arr[n-i .. n-1] contains the i largest elements of the original array in strictly sorted ascending order."
-        },
-        {
-          q: "Why is Bubble Sort considered stable?",
-          a: "Adjacent elements are swapped only when arr[j] > arr[j+1]. Equal elements (arr[j] == arr[j+1]) never satisfy the condition, preserving their original relative sequence."
-        },
-        {
-          q: "What is the maximum number of comparisons and swaps in Bubble Sort?",
-          a: "Comparisons: exactly n(n - 1) / 2 in the unoptimized version. Swaps: exactly equal to the total number of inversions in the input array, up to n(n - 1) / 2 in reverse-sorted data."
-        }
-      ],
-      quiz: [
-        {
-          q: "What triggers an early termination in optimized Bubble Sort?",
-          options: ["Reaching the middle of the array", "A complete pass with zero swaps performed", "Finding a duplicate element", "After exactly 3 iterations"],
-          correct: 1,
-          exp: "Correct! If an entire inner loop pass makes 0 swaps, all adjacent pairs are ordered, proving the array is sorted."
-        },
-        {
-          q: "Is Bubble Sort a stable sorting algorithm?",
-          options: ["Yes, equal elements are never swapped", "No, it swaps across arbitrary distances", "Only for arrays of even length", "Only when using a flag"],
-          correct: 0,
-          exp: "Correct! The condition arr[j] > arr[j+1] strictly requires a strictly greater element to trigger a swap, keeping equal keys stable."
-        },
-        {
-          q: "What is the worst-case number of swaps for Bubble Sort on an array of size n?",
-          options: ["n", "n log n", "n(n - 1) / 2", "2^n"],
-          correct: 2,
-          exp: "Correct! On a strictly reverse-sorted array, every pair of elements forms an inversion, requiring n(n-1)/2 swaps."
-        }
-      ],
-      cppCode: [
-        "class BubbleSort {",
-        "public:",
-        "    static void swap(int &a, int &b) {",
-        "        int temp = a; a = b; b = temp;",
-        "    }",
-        "    static void sort(int arr[], int n) {",
-        "        for (int i = 0; i < n - 1; i++) {",
-        "            bool swapped = false;",
-        "            for (int j = 0; j < n - i - 1; j++) {",
-        "                if (arr[j] > arr[j + 1]) {",
-        "                    swap(arr[j], arr[j + 1]);",
-        "                    swapped = true;",
-        "                }",
-        "            }",
-        "            if (!swapped) break;",
-        "        }",
-        "    }",
-        "};"
-      ],
-      pseudoCode: [
-        "algorithm BubbleSort(A, n):",
-        "    for i from 0 to n - 2:",
-        "        swapped = false",
-        "        for j from 0 to n - i - 2:",
-        "            if A[j] > A[j + 1]:",
-        "                swap(A[j], A[j + 1])",
-        "                swapped = true",
-        "        if not swapped: break",
-        "    return A"
-      ]
-    },
-    {
-      id: 6,
-      name: "Selection Sort",
-      shortName: "Selection",
-      color: "#0284C7",
-      bgColor: "#F0F9FF",
-      desc: "Divides the array into sorted prefix and unsorted suffix. Repeatedly finds the minimum element from the unsorted suffix and swaps it with the first unsorted position.",
-      complexityBest: "O(n²)",
-      complexityAvg: "O(n²)",
-      complexityWorst: "O(n²)",
-      space: "O(1) in-place",
-      stable: "No",
-      inPlace: "Yes",
-      analogy: "Scanning a bookshelf for the thinnest book and placing it in slot 1. Then scanning the remaining unsorted shelf for the next thinnest and placing it in slot 2.",
-      workedExample: [
-        { step: "i = 0", text: "Array [45, 12, 89, 3, 27]. Minimum in [0..4] is 3 (at index 3). Swap arr[0] and arr[3] -> [3, 12, 89, 45, 27]." },
-        { step: "i = 1", text: "Unsorted [12, 89, 45, 27]. Minimum is 12 (at index 1). Swap arr[1] with arr[1] (no-op) -> [3, 12, 89, 45, 27]." },
-        { step: "i = 2", text: "Unsorted [89, 45, 27]. Minimum is 27 (at index 4). Swap arr[2] and arr[4] -> [3, 12, 27, 45, 89]." },
-        { step: "i = 3", text: "Unsorted [45, 89]. Minimum is 45 (at index 3). Swap arr[3] with arr[3] -> [3, 12, 27, 45, 89]. Sorted!" }
-      ],
-      pros: [
-        "Minimal memory writes: performs at most n - 1 swaps in all cases",
-        "Strictly in-place with O(1) auxiliary memory",
-        "Simple implementation without recursive stack overhead",
-        "Ideal when write operations to memory are significantly expensive (e.g. Flash/EEPROM)"
-      ],
-      cons: [
-        "Performs O(n²) comparisons in ALL cases, even when the input is already sorted",
-        "Unstable: can change relative order of identical elements",
-        "Does not adapt to existing presorted runs"
-      ],
-      whenToUse: "Systems with expensive write cycles (like Flash EEPROM memory) where minimizing memory writes to O(n) is critical.",
-      vivaQA: [
-        {
-          q: "Why does Selection Sort perform O(n²) comparisons even on a sorted array?",
-          a: "Because the inner loop must scan the entire remaining unsorted suffix arr[i .. n-1] to confirm that no smaller element exists, totaling (n - 1) + (n - 2) + ... + 1 = n(n - 1) / 2 comparisons unconditionally."
-        },
-        {
-          q: "What is the primary advantage of Selection Sort over Bubble and Insertion Sort?",
-          a: "Selection Sort performs at most (n - 1) memory writes (swaps). Bubble and Insertion sort can perform up to O(n²) writes or element shifts."
-        },
-        {
-          q: "Why is standard Selection Sort not stable?",
-          a: "A long-range swap can move the selected minimum element past equal elements. For example, sorting [4a, 4b, 2] swaps 4a with 2, resulting in [2, 4b, 4a], reversing 4a and 4b."
-        },
-        {
-          q: "What is the formal loop invariant for Selection Sort?",
-          a: "At the start of outer loop iteration i, subarray arr[0 .. i - 1] contains the smallest i elements of the entire array in sorted order, and no element in arr[i .. n - 1] is smaller than any element in arr[0 .. i - 1]."
-        }
-      ],
-      quiz: [
-        {
-          q: "How many memory swaps does Selection Sort perform in the worst case?",
-          options: ["n(n - 1) / 2", "At most n - 1", "n log n", "0"],
-          correct: 1,
-          exp: "Correct! Selection Sort performs at most one swap per outer loop iteration, totaling at most n - 1 swaps."
-        },
-        {
-          q: "Why is Selection Sort advantageous for EEPROM / Flash memory architectures?",
-          options: ["It uses the least RAM", "It minimizes memory write cycles, preserving flash wear life", "It runs in O(n) time", "It uses no comparisons"],
-          correct: 1,
-          exp: "Correct! Flash memory has limited write endurance. Selection Sort's O(n) write bound minimizes write wear."
-        },
-        {
-          q: "What is the best-case time complexity of standard Selection Sort?",
-          options: ["O(n)", "O(n log n)", "O(n²)", "O(1)"],
-          correct: 2,
-          exp: "Correct! Selection Sort always scans the full remaining suffix, making O(n²) comparisons regardless of initial input order."
-        }
-      ],
-      cppCode: [
-        "class SelectionSort {",
-        "public:",
-        "    static void swap(int &a, int &b) {",
-        "        int temp = a; a = b; b = temp;",
-        "    }",
-        "    static void sort(int arr[], int n) {",
-        "        for (int i = 0; i < n - 1; i++) {",
-        "            int minIdx = i;",
-        "            for (int j = i + 1; j < n; j++) {",
-        "                if (arr[j] < arr[minIdx])",
-        "                    minIdx = j;",
-        "            }",
-        "            if (minIdx != i) swap(arr[i], arr[minIdx]);",
-        "        }",
-        "    }",
-        "};"
-      ],
-      pseudoCode: [
-        "algorithm SelectionSort(A, n):",
-        "    for i from 0 to n - 2:",
-        "        minIdx = i",
-        "        for j from i + 1 to n - 1:",
-        "            if A[j] < A[minIdx]: minIdx = j",
-        "        if minIdx != i: swap(A[i], A[minIdx])",
-        "    return A"
       ]
     }
   ];
@@ -2269,7 +2044,7 @@
       state.worker.postMessage({
         command: 'RUN_BENCHMARK',
         data: state.currentArray,
-        algoIds: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+        algoIds: [0, 1, 2, 3, 4],
         runs: 7,
         requestId: 'BENCH_' + Date.now()
       });
@@ -2456,7 +2231,7 @@
     renderMatrixSkeleton();
 
     const distributions = ['random', 'sorted', 'reverse', 'nearly_sorted', 'duplicates'];
-    const algoIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+    const algoIds = [0, 1, 2, 3, 4];
 
     if (state.worker) {
       state.worker.postMessage({
@@ -3421,8 +3196,8 @@
 
     const scenario = scenarioSelect.value;
     const betChampId = parseInt(champSelect.value, 10);
-    const competitors = [4, 2, 1, 3]; // Adaptive, Quick, Merge, Heap
-    if (!competitors.includes(betChampId)) competitors.push(betChampId);
+    const competitors = [0, 1, 2, 3, 4];
+    // user champion already in list
 
     const testData = generatePresetArray(scenario, 80);
     if (btn) { btn.disabled = true; btn.textContent = '🏁 Racing...'; }
@@ -3723,23 +3498,39 @@
     // Step 1: Input text box validation
     const inputBox = document.getElementById('customInputBox');
     const inputFeedback = document.getElementById('inputFeedback');
+    const btnApplyInput = document.getElementById('btnApplyCustomInput');
+
+    const handleApplyInput = () => {
+      if (!inputBox) return;
+      const parsed = parseAndValidateInput(inputBox.value);
+      if (parsed.valid) {
+        if (inputFeedback) {
+          inputFeedback.className = 'input-feedback valid';
+          inputFeedback.innerHTML = `<span>&#10003; ${parsed.numbers.length} valid numbers loaded. Ready for visualization.</span>`;
+        }
+        state.currentArray = parsed.numbers;
+        updateArrayPreview(parsed.numbers);
+      } else {
+        if (inputFeedback) {
+          inputFeedback.className = 'input-feedback invalid';
+          inputFeedback.innerHTML = `<span>&#10007; ${parsed.error}</span>`;
+        }
+      }
+    };
+
     if (inputBox) {
-      inputBox.addEventListener('input', () => {
-        const parsed = parseAndValidateInput(inputBox.value);
-        if (parsed.valid) {
-          if (inputFeedback) {
-            inputFeedback.className = 'input-feedback valid';
-            inputFeedback.innerHTML = `<span>&#10003; ${parsed.numbers.length} valid numbers loaded. Ready for visualization.</span>`;
-          }
-          state.currentArray = parsed.numbers;
-          updateArrayPreview(parsed.numbers);
-        } else {
-          if (inputFeedback) {
-            inputFeedback.className = 'input-feedback invalid';
-            inputFeedback.innerHTML = `<span>&#10007; ${parsed.error}</span>`;
-          }
+      inputBox.addEventListener('input', handleApplyInput);
+      inputBox.addEventListener('change', handleApplyInput);
+      inputBox.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          handleApplyInput();
         }
       });
+    }
+
+    if (btnApplyInput) {
+      btnApplyInput.addEventListener('click', handleApplyInput);
     }
 
 

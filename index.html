@@ -122,12 +122,15 @@
           </div>
 
           <div class="input-field-wrap">
-            <input type="text" id="customInputBox" class="text-input-field" 
-                   value="45, 12, 89, 3, 27" 
-                   placeholder="e.g. 45, 12, 89, 3, 27 (comma or space separated)"
-                   autocomplete="off" spellcheck="false">
+            <div style="display: flex; gap: 0.5rem; width: 100%;">
+              <input type="text" id="customInputBox" class="text-input-field" 
+                     value="45, 12, 89, 3, 27" 
+                     placeholder="e.g. 45, 12, 89, 3, 27 or [45, 12, 89] (any numbers)"
+                     autocomplete="off" spellcheck="false" style="flex: 1;">
+              <button type="button" class="btn btn-sm btn-primary" id="btnApplyCustomInput" style="white-space: nowrap; padding: 0.5rem 1rem;">Set Input</button>
+            </div>
             <div id="inputFeedback" class="input-feedback valid">
-              <span>&#10003; 5 valid numbers loaded. Ready for visualization.</span>
+              <span>&#10003; 5 numbers loaded. Ready for visualization.</span>
             </div>
           </div>
 
@@ -170,38 +173,30 @@
 
           <div class="algo-chips-grid" id="algoChipsGrid">
             <div class="algo-chip selected" data-algo="0">
-              <span class="algo-chip-name" style="color: var(--algo-insertion);">Insertion</span>
-              <span class="algo-chip-indicator" style="background-color: var(--algo-insertion);"></span>
+              <span class="algo-chip-name" style="color: var(--algo-bubble);">Bubble</span>
+              <span class="algo-chip-indicator" style="background-color: var(--algo-bubble);"></span>
             </div>
             <div class="algo-chip" data-algo="1">
-              <span class="algo-chip-name" style="color: var(--algo-merge);">Merge</span>
+              <span class="algo-chip-name" style="color: var(--algo-selection);">Selection</span>
               <span class="algo-chip-indicator" style="background-color: transparent;"></span>
             </div>
             <div class="algo-chip" data-algo="2">
-              <span class="algo-chip-name" style="color: var(--algo-quick);">Quick</span>
+              <span class="algo-chip-name" style="color: var(--algo-insertion);">Insertion</span>
               <span class="algo-chip-indicator" style="background-color: transparent;"></span>
             </div>
             <div class="algo-chip" data-algo="3">
-              <span class="algo-chip-name" style="color: var(--algo-heap);">Heap</span>
+              <span class="algo-chip-name" style="color: var(--algo-merge);">Merge</span>
               <span class="algo-chip-indicator" style="background-color: transparent;"></span>
             </div>
             <div class="algo-chip" data-algo="4">
-              <span class="algo-chip-name" style="color: var(--algo-adaptive);">Adaptive</span>
-              <span class="algo-chip-indicator" style="background-color: transparent;"></span>
-            </div>
-            <div class="algo-chip" data-algo="5">
-              <span class="algo-chip-name" style="color: var(--algo-bubble);">Bubble</span>
-              <span class="algo-chip-indicator" style="background-color: transparent;"></span>
-            </div>
-            <div class="algo-chip" data-algo="6">
-              <span class="algo-chip-name" style="color: var(--algo-selection);">Selection</span>
+              <span class="algo-chip-name" style="color: var(--algo-quick);">Quick</span>
               <span class="algo-chip-indicator" style="background-color: transparent;"></span>
             </div>
           </div>
 
           <div class="algo-desc-box" id="algoDescBox">
-            <span id="algoDescText">Insertion Sort: Builds sorted prefix by shifting larger elements right. Optimal O(n) for small or presorted arrays.</span>
-            <span class="mono" id="algoComplexityBadge" style="font-weight: 800; color: var(--algo-insertion);">O(n²) Avg</span>
+            <span id="algoDescText">Bubble Sort: Compares adjacent elements and bubbles larger values to the end. Flag-optimized for O(n) on sorted arrays.</span>
+            <span class="mono" id="algoComplexityBadge" style="font-weight: 800; color: var(--algo-bubble);">O(n²) Avg</span>
           </div>
 
           <label class="comparison-mode-toggle">
@@ -219,7 +214,7 @@
             <!-- Stage Status Header -->
             <div class="stage-status-header">
               <div>
-                <span id="stageAlgoName" style="color: var(--algo-insertion); font-size: 1rem;">Insertion Sort</span>
+                <span id="stageAlgoName" style="color: var(--algo-bubble); font-size: 1rem;">Bubble Sort</span>
                 <span style="color: var(--ink-muted); margin-left: 0.5rem;" id="stageStatusPhase">| Ready to execute</span>
               </div>
               <div id="verifiedBadge" style="display: none; color: var(--bar-sorted); font-weight: 800;">
@@ -556,13 +551,11 @@
               2. Place Your Bet (Predicted Winner)
             </label>
             <select id="battleChampionSelect" class="text-input-field" style="padding: 0.55rem 0.85rem; font-size: 0.88rem;">
-              <option value="4">Adaptive Sort</option>
-              <option value="2">Quick Sort</option>
-              <option value="1">Merge Sort</option>
-              <option value="3">Heap Sort</option>
-              <option value="0">Insertion Sort</option>
-              <option value="5">Bubble Sort</option>
-              <option value="6">Selection Sort</option>
+              <option value="4">Quick Sort</option>
+              <option value="3">Merge Sort</option>
+              <option value="2">Insertion Sort</option>
+              <option value="1">Selection Sort</option>
+              <option value="0">Bubble Sort</option>
             </select>
           </div>
         </div>
@@ -629,19 +622,17 @@
         </div>
         <div class="section-marginalia">
           Complete conceptual breakdown, real-life analogies, worked step-by-step examples,
-          full C++ code with comments, complexity tables, viva questions, and interactive quizzes for all 10 algorithms.
+          full C++ code with comments, complexity tables, viva questions, and interactive quizzes for all 5 algorithms.
         </div>
       </div>
 
-      <!-- Algorithm Study Tabs: 7 Core Algorithms -->
+      <!-- Algorithm Study Tabs: 5 Core Algorithms -->
       <div class="learn-algo-tabs" id="learnAlgoTabs">
-        <button type="button" class="learn-tab-btn active" data-algo="0">Insertion</button>
-        <button type="button" class="learn-tab-btn" data-algo="1">Merge</button>
-        <button type="button" class="learn-tab-btn" data-algo="2">Quick</button>
-        <button type="button" class="learn-tab-btn" data-algo="3">Heap</button>
-        <button type="button" class="learn-tab-btn" data-algo="4">Adaptive</button>
-        <button type="button" class="learn-tab-btn" data-algo="5">Bubble</button>
-        <button type="button" class="learn-tab-btn" data-algo="6">Selection</button>
+        <button type="button" class="learn-tab-btn active" data-algo="0">Bubble</button>
+        <button type="button" class="learn-tab-btn" data-algo="1">Selection</button>
+        <button type="button" class="learn-tab-btn" data-algo="2">Insertion</button>
+        <button type="button" class="learn-tab-btn" data-algo="3">Merge</button>
+        <button type="button" class="learn-tab-btn" data-algo="4">Quick</button>
       </div>
 
       <!-- Dynamic Study Block Container -->
@@ -660,7 +651,7 @@
           <h2 class="section-title">Benchmark Suite &amp; Behavior Matrix</h2>
         </div>
         <div class="section-marginalia">
-          Evaluates all 7 algorithms across Sorted, Reverse, Nearly Sorted, Random, and Duplicate-heavy data,
+          Evaluates all 5 algorithms across Sorted, Reverse, Nearly Sorted, Random, and Duplicate-heavy data,
           with empirical growth curves up to N = 50,000.
         </div>
       </div>
@@ -670,10 +661,10 @@
         <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.65rem; flex-wrap: wrap; gap: 0.5rem;">
           <div>
             <h3 style="font-size: 1.45rem; margin-bottom: 0.2rem;">Theoretical Complexity &amp; Algorithmic Properties</h3>
-            <p style="font-size: 14px; color: var(--ink-muted); margin: 0;">Comprehensive academic reference for all 7 DSA sorting algorithms. Click any column header to sort.</p>
+            <p style="font-size: 14px; color: var(--ink-muted); margin: 0;">Comprehensive academic reference for all 5 DSA sorting algorithms. Click any column header to sort.</p>
           </div>
           <span class="mono" style="font-size: 0.8rem; color: var(--ink-muted); background: var(--paper-subtle); padding: 4px 10px; border-radius: var(--radius-pill); border: 1px solid var(--ink-border);">
-            7 Algorithms &bull; Sticky 1st Col &bull; Sortable
+            5 Algorithms &bull; Sticky 1st Col &bull; Sortable
           </span>
         </div>
         <div class="table-scroll-wrap">
@@ -716,7 +707,7 @@
 
         <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
           <button type="button" class="btn btn-sm btn-primary" id="btnRunBenchmarkSuite">
-            <span>&#9654; Run 7-Algorithm Benchmark Suite</span>
+            <span>&#9654; Run 5-Algorithm Benchmark Suite</span>
           </button>
           <button type="button" class="btn btn-sm" id="btnExportCsv">
             <span>&darr; Export CSV</span>

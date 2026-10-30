@@ -1027,16 +1027,15 @@ void bubbleSort(int* arr, int size, SortMetrics& metrics, bool recordTrace) {
 }
 
 // ============================================================================
-// 9. BENCHMARK SUITE RUNNER & DISPATCHER (6 CORE DSA ALGORITHMS)
+// 9. BENCHMARK SUITE RUNNER & DISPATCHER (5 CORE DSA ALGORITHMS)
 // ============================================================================
 
 enum AlgorithmID {
-    ALGO_INSERTION = 0,
-    ALGO_MERGE = 1,
-    ALGO_QUICK = 2,
-    ALGO_HEAP = 3,
-    ALGO_ADAPTIVE = 4,
-    ALGO_BUBBLE = 5
+    ALGO_BUBBLE    = 0,
+    ALGO_SELECTION = 1,
+    ALGO_INSERTION = 2,
+    ALGO_MERGE     = 3,
+    ALGO_QUICK     = 4
 };
 
 SortMetrics runSortAlgorithm(int algoId, const int* sourceData, int size, bool recordTrace) {
@@ -1052,6 +1051,31 @@ SortMetrics runSortAlgorithm(int algoId, const int* sourceData, int size, bool r
     auto startTime = std::chrono::high_resolution_clock::now();
 
     switch (algoId) {
+        case ALGO_BUBBLE:
+            bubbleSort(buffer, size, metrics, recordTrace);
+            break;
+        case ALGO_SELECTION: {
+            // Selection Sort (traced, matches dispatcher pattern)
+            metrics.algorithmName = "Selection Sort";
+            metrics.arraySize = size;
+            metrics.auxiliaryMemoryBytes = sizeof(int);
+            for (int i = 0; i < size - 1; i++) {
+                int minIdx = i;
+                for (int j = i + 1; j < size; j++) {
+                    metrics.comparisons++;
+                    if (buffer[j] < buffer[minIdx]) minIdx = j;
+                }
+                if (minIdx != i) {
+                    doSwap(buffer, i, minIdx, size, 8, "Swapped minimum into sorted head.", metrics, recordTrace);
+                }
+                if (recordTrace) {
+                    metrics.trace.push_back({OP_MARK_SORTED, i, -1, buffer[i], 9,
+                        "Locked minimum " + std::to_string(buffer[i]) + " into sorted position [" + std::to_string(i) + "].",
+                        makeSnapshot(buffer, size), ""});
+                }
+            }
+            break;
+        }
         case ALGO_INSERTION:
             insertionSort(buffer, size, metrics, recordTrace);
             break;
@@ -1060,15 +1084,6 @@ SortMetrics runSortAlgorithm(int algoId, const int* sourceData, int size, bool r
             break;
         case ALGO_QUICK:
             quickSort(buffer, size, metrics, recordTrace);
-            break;
-        case ALGO_HEAP:
-            heapSort(buffer, size, metrics, recordTrace);
-            break;
-        case ALGO_ADAPTIVE:
-            adaptiveSort(buffer, size, metrics, recordTrace);
-            break;
-        case ALGO_BUBBLE:
-            bubbleSort(buffer, size, metrics, recordTrace);
             break;
         default:
             metrics.algorithmName = "Unknown";
@@ -1192,12 +1207,12 @@ int main() {
     for (int i = 0; i < nDemo; ++i) std::cout << demo[i] << " ";
     std::cout << "\n\n";
 
-    // 2. Testing all 6 core algorithms with benchmark metrics
-    std::cout << "[2] Benchmarking All 6 Sorting Algorithms on [45, 12, 89, 3, 27]:\n";
+    // 2. Testing all 5 core algorithms with benchmark metrics
+    std::cout << "[2] Benchmarking All 5 Sorting Algorithms on [45, 12, 89, 3, 27]:\n";
     int testArr[] = {45, 12, 89, 3, 27};
     int size = 5;
 
-    for (int algo = 0; algo < 6; ++algo) {
+    for (int algo = 0; algo < 5; ++algo) {
         SortMetrics m = runSortAlgorithm(algo, testArr, size, true);
         std::cout << "  Algo " << algo << ": " << std::left << std::setw(28) << m.algorithmName
                   << " | Correct: " << (m.isCorrect ? "YES" : "NO")
@@ -1205,7 +1220,7 @@ int main() {
                   << " | Time: " << m.elapsedMicroseconds << "us\n";
     }
 
-    std::cout << "\nAll 6 sorting algorithms verified successfully!\n";
+    std::cout << "\nAll 5 sorting algorithms verified successfully!\n";
     return 0;
 }
 
